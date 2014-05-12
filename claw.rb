@@ -8,6 +8,16 @@ EDGE = {
   'windows64' => 'http://go-cli.s3.amazonaws.com/master/cf-windows-amd64.zip',
 }
 
+STABLE = {
+  'debian32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_i386.deb',
+  'debian64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_amd64.deb',
+  'redhat32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_i386.rpm',
+  'redhat64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_amd64.rpm',
+  'macosx64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/installer-osx-amd64.pkg',
+  'windows32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/installer-windows-386.zip',
+  'windows64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/installer-windows-amd64.zip',
+}
+
 get '/hi' do
     "Hello World!"
 end
@@ -17,4 +27,11 @@ get '/edge' do
     halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE.keys.join(', ')}"
   end
   redirect EDGE[params['arch']], 302
+end
+
+get '/stable' do
+  if !params.has_key?('release') || STABLE[params['release']].nil?
+    halt 412, "Invalid 'release' value, please select one of the following edge: #{STABLE.keys.join(', ')}"
+  end
+  redirect STABLE[params['release']], 302
 end

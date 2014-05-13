@@ -1,3 +1,5 @@
+ENV['RACK_ENV'] = 'test'
+
 require_relative 'claw'
 require 'test/unit'
 require 'rack/test'
@@ -6,7 +8,7 @@ class ClawTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    Sinatra::Application
+    Claw
   end
 
   def test_hi

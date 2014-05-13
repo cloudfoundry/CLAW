@@ -18,20 +18,24 @@ STABLE = {
   'windows64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/installer-windows-amd64.zip',
 }
 
-get '/hi' do
+class Claw < Sinatra::Base
+  get '/hi' do
     "Hello World!"
-end
-
-get '/edge' do
-  if !params.has_key?('arch') || EDGE[params['arch']].nil?
-    halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE.keys.join(', ')}"
   end
-  redirect EDGE[params['arch']], 302
-end
 
-get '/stable' do
-  if !params.has_key?('release') || STABLE[params['release']].nil?
-    halt 412, "Invalid 'release' value, please select one of the following edge: #{STABLE.keys.join(', ')}"
+  get '/edge' do
+    if !params.has_key?('arch') || EDGE[params['arch']].nil?
+      halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE.keys.join(', ')}"
+    end
+    redirect EDGE[params['arch']], 302
   end
-  redirect STABLE[params['release']], 302
+
+  get '/stable' do
+    if !params.has_key?('release') || STABLE[params['release']].nil?
+      halt 412, "Invalid 'release' value, please select one of the following edge: #{STABLE.keys.join(', ')}"
+    end
+    redirect STABLE[params['release']], 302
+  end
+
+  run! if app_file == $0
 end

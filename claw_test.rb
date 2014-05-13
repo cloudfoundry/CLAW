@@ -11,9 +11,9 @@ class ClawTest < Test::Unit::TestCase
     Claw
   end
 
-  def test_hi
-    get '/hi'
-    assert_equal 'Hello World!', last_response.body
+  def test_ping
+    get '/ping'
+    assert_equal 'pong', last_response.body
   end
 
   def test_edge_will_direct_you_to_link

@@ -19,8 +19,8 @@ STABLE = {
 }
 
 class Claw < Sinatra::Base
-  get '/hi' do
-    "Hello World!"
+  get '/ping' do
+    'pong'
   end
 
   get '/edge' do

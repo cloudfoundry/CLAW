@@ -9,13 +9,13 @@ EDGE = {
 }
 
 STABLE = {
-  'debian32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_i386.deb',
-  'debian64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_amd64.deb',
-  'redhat32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_i386.rpm',
-  'redhat64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/cf-cli_amd64.rpm',
-  'macosx64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/installer-osx-amd64.pkg',
-  'windows32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/installer-windows-386.zip',
-  'windows64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/latest/installer-windows-amd64.zip',
+  'debian32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v6.1.2/cf-cli_i386.deb',
+  'debian64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v6.1.2/cf-cli_amd64.deb',
+  'redhat32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v6.1.2/cf-cli_i386.rpm',
+  'redhat64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v6.1.2/cf-cli_amd64.rpm',
+  'macosx64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v6.1.2/installer-osx-amd64.pkg',
+  'windows32' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v6.1.2/installer-windows-386.zip',
+  'windows64' => 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v6.1.2/installer-windows-amd64.zip',
 }
 
 class Claw < Sinatra::Base

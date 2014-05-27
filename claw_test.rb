@@ -17,11 +17,11 @@ class ClawTest < Test::Unit::TestCase
   end
 
   def test_edge_will_direct_you_to_link
-    EDGE.each do |arch, link|
+    EDGE_ARCH_TO_FILENAMES.each do |arch, filename|
       get '/edge', 'arch' => arch
 
       assert_equal 302, last_response.status, "Error requesting: #{arch}"
-      assert_equal link, last_response.original_headers['location'], "Could not find: #{arch}"
+      assert_equal EDGE_LINK % {file_name: filename}, last_response.original_headers['location'], "Could not find: #{arch}"
     end
   end
 

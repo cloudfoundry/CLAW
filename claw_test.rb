@@ -40,11 +40,12 @@ class ClawTest < Test::Unit::TestCase
   end
 
   def test_stable_will_direct_you_to_link
-    STABLE.each do |release, link|
+    STABLE_RELEASE_TO_FILENAME.each do |release, filename|
       get '/stable', 'release' => release
 
+      redirect_link = STABLE_LINK % {version: LATEST_STABLE_VERSION, release: filename}
       assert_equal 302, last_response.status, "Error requesting: #{release}"
-      assert_equal link, last_response.original_headers['location'], "Could not find: #{release}"
+      assert_equal redirect_link, last_response.original_headers['location'], "Could not find: #{release}"
     end
   end
 

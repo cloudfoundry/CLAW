@@ -9,7 +9,13 @@ EDGE_ARCH_TO_FILENAMES = {
     'windows64' => 'cf-windows-amd64.zip',
 }
 
-LATEST_STABLE_VERSION = '6.1.2'
+STABLE_VERSIONS = %w{
+  6.0.2
+  6.1.0
+  6.1.1
+  6.1.2
+}
+LATEST_STABLE_VERSION = STABLE_VERSIONS.last
 STABLE_LINK = 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v%{version}/%{release}'
 STABLE_RELEASE_TO_FILENAME = {
     'debian32' => 'cf-cli_i386.deb',
@@ -34,10 +40,20 @@ class Claw < Sinatra::Base
   end
 
   get '/stable' do
-    if !params.has_key?('release') || STABLE_RELEASE_TO_FILENAME[params['release']].nil?
-      halt 412, "Invalid 'release' value, please select one of the following edge: #{STABLE_RELEASE_TO_FILENAME.keys.join(', ')}"
+    validate_stable_link_parameters(params['release'], params['version'])
+    request_version = params['version'] || LATEST_STABLE_VERSION
+
+    redirect STABLE_LINK % {version: request_version, release: STABLE_RELEASE_TO_FILENAME[params['release']]}, 302
+  end
+
+  def validate_stable_link_parameters(release, version)
+    if release.nil? || STABLE_RELEASE_TO_FILENAME[release].nil?
+      halt 412, "Invalid 'release' value, please select one of the following releases: #{STABLE_RELEASE_TO_FILENAME.keys.join(', ')}"
     end
-    redirect STABLE_LINK % {version: LATEST_STABLE_VERSION, release: STABLE_RELEASE_TO_FILENAME[params['release']]}, 302
+
+    if version && !STABLE_VERSIONS.include?(version)
+      halt 412, "Invalid 'version' value, please select one of the following versions: #{STABLE_VERSIONS.join(', ')}"
+    end
   end
 
   run! if app_file == $0

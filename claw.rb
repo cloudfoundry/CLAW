@@ -23,6 +23,7 @@ STABLE_RELEASE_TO_FILENAME = {
     'redhat32' => 'cf-cli_i386.rpm',
     'redhat64' => 'cf-cli_amd64.rpm',
     'macosx64' => 'installer-osx-amd64.pkg',
+    'macosx64-binary' => 'cf-darwin-amd64.tgz',
     'windows32' => 'installer-windows-386.zip',
     'windows64' => 'installer-windows-amd64.zip',
 }

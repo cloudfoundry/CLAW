@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'gabba'
 
 EDGE_LINK = 'http://go-cli.s3.amazonaws.com/master/%{file_name}'
 EDGE_ARCH_TO_FILENAMES = {
@@ -28,7 +29,17 @@ STABLE_RELEASE_TO_FILENAME = {
     'windows64' => 'installer-windows-amd64.zip',
 }
 
+unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
+  puts "Expected a Google Analytics env vars but they were not set"
+  exit 1
+end
+
 class Claw < Sinatra::Base
+  def initialize(*args)
+    super
+    @hey = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'])
+  end
+
   get '/ping' do
     'pong'
   end
@@ -37,6 +48,8 @@ class Claw < Sinatra::Base
     if !params.has_key?('arch') || EDGE_ARCH_TO_FILENAMES[params['arch']].nil?
       halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_FILENAMES.keys.join(', ')}"
     end
+
+    @hey.page_view('edge', "edge/#{params['arch']}")
     redirect EDGE_LINK % {file_name: EDGE_ARCH_TO_FILENAMES[params['arch']]}, 302
   end
 
@@ -44,6 +57,7 @@ class Claw < Sinatra::Base
     validate_stable_link_parameters(params['release'], params['version'])
     request_version = params['version'] || LATEST_STABLE_VERSION
 
+    @hey.page_view('stable', "stable/#{params['release']}", request_version)
     redirect STABLE_LINK % {version: request_version, release: STABLE_RELEASE_TO_FILENAME[params['release']]}, 302
   end
 

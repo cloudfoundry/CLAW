@@ -1,12 +1,13 @@
-source "http://rubygems.org"
+source 'http://rubygems.org'
 
-ruby "2.0.0"
+ruby '2.0.0'
 
-gem "sinatra"
-gem "json"
-gem "unicorn"
+gem 'sinatra'
+gem 'json'
+gem 'unicorn'
+gem 'gabba'
 
 group :test, :development do
-  gem "rspec"
-  gem "rack-test"
+  gem 'rspec'
+  gem 'rack-test'
 end

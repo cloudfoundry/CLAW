@@ -2,6 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     diff-lcs (1.2.5)
+    gabba (1.0.1)
     json (1.8.1)
     kgio (2.9.2)
     rack (1.5.2)
@@ -32,6 +33,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  gabba
   json
   rack-test
   rspec

@@ -39,7 +39,9 @@ class Claw < Sinatra::Base
     @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
     @google_analytics.utmul = get_language
     @google_analytics.ip(request.ip)
+    @google_analytics.referer(request.referer)
     @google_analytics.set_custom_var(1, 'ip', request.ip, 3)
+    @google_analytics.set_custom_var(2, 'source', params['source'], 3)
   end
 
   get '/ping' do

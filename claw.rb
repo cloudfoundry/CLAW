@@ -10,15 +10,15 @@ EDGE_ARCH_TO_FILENAMES = {
     'windows64' => 'cf-windows-amd64.zip',
 }
 
-STABLE_VERSIONS = %w{
+AVAILABLE_VERSIONS = %w{
   6.0.2
   6.1.0
   6.1.1
   6.1.2
 }
-LATEST_STABLE_VERSION = STABLE_VERSIONS.last
-STABLE_LINK = 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v%{version}/%{release}'
-STABLE_RELEASE_TO_FILENAME = {
+STABLE_VERSION = "6.1.2"
+VERSIONED_RELEASE_LINK = 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v%{version}/%{release}'
+RELEASE_TO_FILENAME = {
     'debian32' => 'cf-cli_i386.deb',
     'debian64' => 'cf-cli_amd64.deb',
     'redhat32' => 'cf-cli_i386.rpm',
@@ -59,19 +59,19 @@ class Claw < Sinatra::Base
 
   get '/stable' do
     validate_stable_link_parameters(params['release'], params['version'])
-    request_version = params['version'] || LATEST_STABLE_VERSION
+    request_version = params['version'] || STABLE_VERSION
 
     @google_analytics.page_view('stable', "stable/#{params['release']}/#{request_version}")
-    redirect STABLE_LINK % {version: request_version, release: STABLE_RELEASE_TO_FILENAME[params['release']]}, 302
+    redirect VERSIONED_RELEASE_LINK % {version: request_version, release: RELEASE_TO_FILENAME[params['release']]}, 302
   end
 
   def validate_stable_link_parameters(release, version)
-    if release.nil? || STABLE_RELEASE_TO_FILENAME[release].nil?
-      halt 412, "Invalid 'release' value, please select one of the following releases: #{STABLE_RELEASE_TO_FILENAME.keys.join(', ')}"
+    if release.nil? || RELEASE_TO_FILENAME[release].nil?
+      halt 412, "Invalid 'release' value, please select one of the following releases: #{RELEASE_TO_FILENAME.keys.join(', ')}"
     end
 
-    if version && !STABLE_VERSIONS.include?(version)
-      halt 412, "Invalid 'version' value, please select one of the following versions: #{STABLE_VERSIONS.join(', ')}"
+    if version && !AVAILABLE_VERSIONS.include?(version)
+      halt 412, "Invalid 'version' value, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
   end
 

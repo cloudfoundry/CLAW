@@ -35,9 +35,11 @@ unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
 end
 
 class Claw < Sinatra::Base
-  def initialize(*args)
-    super
-    @hey = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'])
+  before do
+    @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
+    @google_analytics.utmul = get_language
+    @google_analytics.ip(request.ip)
+    @google_analytics.set_custom_var(1, 'ip', request.ip, 3)
   end
 
   get '/ping' do
@@ -49,7 +51,7 @@ class Claw < Sinatra::Base
       halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_FILENAMES.keys.join(', ')}"
     end
 
-    @hey.page_view('edge', "edge/#{params['arch']}")
+    @google_analytics.page_view('edge', "edge/#{params['arch']}")
     redirect EDGE_LINK % {file_name: EDGE_ARCH_TO_FILENAMES[params['arch']]}, 302
   end
 
@@ -57,7 +59,7 @@ class Claw < Sinatra::Base
     validate_stable_link_parameters(params['release'], params['version'])
     request_version = params['version'] || LATEST_STABLE_VERSION
 
-    @hey.page_view('stable', "stable/#{params['release']}", request_version)
+    @google_analytics.page_view('stable', "stable/#{params['release']}/#{request_version}")
     redirect STABLE_LINK % {version: request_version, release: STABLE_RELEASE_TO_FILENAME[params['release']]}, 302
   end
 
@@ -69,6 +71,15 @@ class Claw < Sinatra::Base
     if version && !STABLE_VERSIONS.include?(version)
       halt 412, "Invalid 'version' value, please select one of the following versions: #{STABLE_VERSIONS.join(', ')}"
     end
+  end
+
+  def get_language
+    lang = request.env['HTTP_ACCEPT_LANGUAGE']
+    return nil unless lang
+
+    first_lang = lang[/\w\w-\w\w/]
+    language, territory = first_lang.split('-')
+    return "#{language.downcase}-#{territory.upcase}"
   end
 
   run! if app_file == $0

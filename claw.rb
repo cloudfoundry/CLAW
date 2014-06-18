@@ -16,13 +16,15 @@ AVAILABLE_VERSIONS = %w{
   6.1.1
   6.1.2
 }
-STABLE_VERSION = "6.1.2"
+STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v%{version}/%{release}'
 RELEASE_TO_FILENAME = {
     'debian32' => 'cf-cli_i386.deb',
     'debian64' => 'cf-cli_amd64.deb',
     'redhat32' => 'cf-cli_i386.rpm',
     'redhat64' => 'cf-cli_amd64.rpm',
+    'linux32' => 'cf-linux-386.tgz',
+    'linux64' => 'cf-linux-amd64.tgz',
     'macosx64' => 'installer-osx-amd64.pkg',
     'macosx64-binary' => 'cf-darwin-amd64.tgz',
     'windows32' => 'installer-windows-386.zip',

@@ -1,3 +1,4 @@
 ---
 applications:
- - command: bundle exec unicorn -p $PORT
+ - name: claw
+   command: bundle exec unicorn -p $PORT

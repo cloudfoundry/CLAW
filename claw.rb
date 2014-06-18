@@ -23,12 +23,14 @@ RELEASE_TO_FILENAME = {
     'debian64' => 'cf-cli_amd64.deb',
     'redhat32' => 'cf-cli_i386.rpm',
     'redhat64' => 'cf-cli_amd64.rpm',
-    'linux32-binary' => 'cf-linux-386.tgz',
-    'linux64-binary' => 'cf-linux-amd64.tgz',
     'macosx64' => 'installer-osx-amd64.pkg',
-    'macosx64-binary' => 'cf-darwin-amd64.tgz',
     'windows32' => 'installer-windows-386.zip',
     'windows64' => 'installer-windows-amd64.zip',
+    'linux32-binary' => 'cf-linux-386.tgz',
+    'linux64-binary' => 'cf-linux-amd64.tgz',
+    'macosx64-binary' => 'cf-darwin-amd64.tgz',
+    'windows32-exe' => 'cf-windows-386.zip',
+    'windows64-exe' => 'cf-windows-amd64.zip',
 }
 
 unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')

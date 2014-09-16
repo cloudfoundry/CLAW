@@ -6,7 +6,7 @@ EDGE_ARCH_TO_FILENAMES = {
     'linux32' => 'cf-linux-386.tgz',
     'linux64' => 'cf-linux-amd64.tgz',
     'macosx64' => 'cf-darwin-amd64.tgz',
-    'windows32' => 'cf-windows-amd32.zip',
+    'windows32' => 'cf-windows-386.zip',
     'windows64' => 'cf-windows-amd64.zip',
 }
 

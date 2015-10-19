@@ -64,7 +64,10 @@ end
 class Claw < Sinatra::Base
   before do
     @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
-    @google_analytics.utmul = get_language
+    accept_language = request.env['HTTP_ACCEPT_LANGUAGE']
+    if accept_language
+      @google_analytics.utmul = accept_language
+    end
     @google_analytics.set_custom_var(1, 'ip', request.ip, 3)
     @google_analytics.set_custom_var(2, 'source', params['source'], 3)
     @google_analytics.set_custom_var(3, 'referer', request.referer, 3)
@@ -99,15 +102,6 @@ class Claw < Sinatra::Base
     if version && !AVAILABLE_VERSIONS.include?(version)
       halt 412, "Invalid 'version' value, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
-  end
-
-  def get_language
-    lang = request.env['HTTP_ACCEPT_LANGUAGE']
-    return nil unless lang
-
-    first_lang = lang[/\w\w-\w\w/]
-    language, territory = first_lang.split('-')
-    return "#{language.downcase}-#{territory.upcase}"
   end
 
   run! if app_file == $0

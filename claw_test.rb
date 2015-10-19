@@ -83,4 +83,11 @@ class ClawTest < Test::Unit::TestCase
 
     assert_equal 412, last_response.status
   end
+
+  def test_google_analytics_http_accept_language
+    header 'Accept-Language', 'da, en-gb;q=0.8, en;q=0.7'
+    get 'stable', {'release' => 'windows64', 'version' => '6.12.4'}
+
+    assert_equal 302, last_response.status
+  end
 end

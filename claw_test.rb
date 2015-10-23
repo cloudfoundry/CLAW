@@ -18,7 +18,7 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 'pong', last_response.body
   end
 
-  def test_edge_will_direct_you_to_link
+  def test_edge_with_arch_redirects
     EDGE_ARCH_TO_FILENAMES.each do |arch, filename|
       get '/edge', 'arch' => arch
 
@@ -27,21 +27,19 @@ class ClawTest < Test::Unit::TestCase
     end
   end
 
-  def test_edge_will_return_412_when_arch_is_not_passed
+  def test_edge_without_arch_returns_412
     get 'edge'
 
     assert_equal 412, last_response.status
-
     assert_match(/invalid 'arch'/i, last_response.body)
   end
 
-  def test_edge_will_return_412_when_passed_invalid_arch
+  def test_edge_with_invalid_arch_returns_412
     get 'edge', 'arch' => 'awesomesause'
-
     assert_equal 412, last_response.status
   end
 
-  def test_stable_will_direct_you_to_link
+  def test_stable_with_release_redirects
     RELEASE_TO_FILENAME.each do |release, filename|
       get '/stable', 'release' => release
 
@@ -51,21 +49,20 @@ class ClawTest < Test::Unit::TestCase
     end
   end
 
-  def test_stable_will_return_412_when_release_is_not_passed
+  def test_stable_without_release_returns_412
     get 'stable'
 
     assert_equal 412, last_response.status
-
     assert_match(/invalid 'release'/i, last_response.body)
   end
 
-  def test_stable_will_return_412_when_passed_invalid_release
+  def test_stable_with_invalid_release_returns_412
     get 'stable', 'release' => 'awesomesause'
 
     assert_equal 412, last_response.status
   end
 
-  def test_stable_will_redirect_to_correct_version_when_passed
+  def test_stable_with_release_and_version_redirects
     release = RELEASE_TO_FILENAME.keys.first
     AVAILABLE_VERSIONS.each do |version|
       get 'stable', {'release' => release, 'version' => version}
@@ -76,7 +73,7 @@ class ClawTest < Test::Unit::TestCase
     end
   end
 
-  def test_stable_will_error_when_passed_invalid_version
+  def test_stable_with_release_and_invalid_version_returns_412
     version = 'potato'
     release = RELEASE_TO_FILENAME.keys.first
     get 'stable', {'release' => release, 'version' => version}
@@ -84,7 +81,7 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 412, last_response.status
   end
 
-  def test_google_analytics_http_accept_language
+  def test_stable_with_http_accept_language_redirects
     header 'Accept-Language', 'da, en-gb;q=0.8, en;q=0.7'
     get 'stable', {'release' => 'windows64', 'version' => '6.12.4'}
 

@@ -3,11 +3,26 @@ require 'gabba'
 
 EDGE_LINK = 'http://go-cli.s3.amazonaws.com/master/%{file_name}'
 EDGE_ARCH_TO_FILENAMES = {
-    'linux32' => 'cf-linux-386.tgz',
-    'linux64' => 'cf-linux-amd64.tgz',
-    'macosx64' => 'cf-darwin-amd64.tgz',
-    'windows32' => 'cf-windows-386.zip',
-    'windows64' => 'cf-windows-amd64.zip',
+    'linux32' => 'cf-cli_edge_linux_i686.tgz',
+    'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
+    'macosx64' => 'cf-cli_edge_osx.tgz',
+    'windows32' => 'cf-cli_win32.zip',
+    'windows64' => 'cf-cli_winx64.zip',
+}
+
+RELEASE_NAMES = %w{
+  debian32
+  debian64
+  redhat32
+  redhat64
+  macosx64
+  windows32
+  windows64
+  linux32-binary
+  linux64-binary
+  macosx64-binary
+  windows32-exe
+  windows64-exe
 }
 
 AVAILABLE_VERSIONS = %w{
@@ -42,20 +57,6 @@ AVAILABLE_VERSIONS = %w{
 }
 STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v%{version}/%{release}'
-RELEASE_TO_FILENAME = {
-    'debian32' => 'cf-cli_i386.deb',
-    'debian64' => 'cf-cli_amd64.deb',
-    'redhat32' => 'cf-cli_i386.rpm',
-    'redhat64' => 'cf-cli_amd64.rpm',
-    'macosx64' => 'installer-osx-amd64.pkg',
-    'windows32' => 'installer-windows-386.zip',
-    'windows64' => 'installer-windows-amd64.zip',
-    'linux32-binary' => 'cf-linux-386.tgz',
-    'linux64-binary' => 'cf-linux-amd64.tgz',
-    'macosx64-binary' => 'cf-darwin-amd64.tgz',
-    'windows32-exe' => 'cf-windows-386.zip',
-    'windows64-exe' => 'cf-windows-amd64.zip',
-}
 
 unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
   puts "Expected a Google Analytics env vars but they were not set"
@@ -88,21 +89,39 @@ class Claw < Sinatra::Base
   end
 
   get '/stable' do
-    validate_stable_link_parameters(params['release'], params['version'])
-    request_version = params['version'] || STABLE_VERSION
+    version = params['version'] || STABLE_VERSION
+    release = params['release']
+    validate_stable_link_parameters(release, version)
 
-    @google_analytics.page_view('stable', "stable/#{params['release']}/#{request_version}")
-    redirect VERSIONED_RELEASE_LINK % {version: request_version, release: RELEASE_TO_FILENAME[params['release']]}, 302
+    @google_analytics.page_view('stable', "stable/#{params['release']}/#{version}")
+    redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename(release, version)}, 302
   end
 
   def validate_stable_link_parameters(release, version)
-    if release.nil? || RELEASE_TO_FILENAME[release].nil?
-      halt 412, "Invalid 'release' value, please select one of the following releases: #{RELEASE_TO_FILENAME.keys.join(', ')}"
+    if !RELEASE_NAMES.include?(release)
+      halt 412, "Invalid 'release' value, please select one of the following releases: #{RELEASE_NAMES.join(', ')}"
     end
 
-    if version && !AVAILABLE_VERSIONS.include?(version)
+    if !AVAILABLE_VERSIONS.include?(version)
       halt 412, "Invalid 'version' value, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
+  end
+
+  def release_to_filename(release, version)
+    {
+      'debian32' => "cf-cli-installer_#{version}_i686.deb",
+      'debian64' => "cf-cli-installer_#{version}_x86-64.deb",
+      'redhat32' => "cf-cli-installer_#{version}_i686.rpm",
+      'redhat64' => "cf-cli-installer_#{version}_x86-64.rpm",
+      'macosx64' => "cf-cli-installer_#{version}_osx.pkg",
+      'windows32' => "cf-cli-installer_#{version}_win32.zip",
+      'windows64' => "cf-cli-installer_#{version}_winx64.zip",
+      'linux32-binary' => "cf-cli_#{version}_linux_i686.tgz",
+      'linux64-binary' => "cf-cli_#{version}_linux_x86-64.tgz",
+      'macosx64-binary' => "cf-cli_#{version}_osx.tgz",
+      'windows32-exe' => "cf-cli_#{version}_win32.zip",
+      'windows64-exe' => "cf-cli_#{version}_winx64.zip",
+    }[release]
   end
 
   run! if app_file == $0

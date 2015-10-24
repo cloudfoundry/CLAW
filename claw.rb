@@ -6,8 +6,8 @@ EDGE_ARCH_TO_FILENAMES = {
     'linux32' => 'cf-cli_edge_linux_i686.tgz',
     'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
     'macosx64' => 'cf-cli_edge_osx.tgz',
-    'windows32' => 'cf-cli_win32.zip',
-    'windows64' => 'cf-cli_winx64.zip',
+    'windows32' => 'cf-cli_edge_win32.zip',
+    'windows64' => 'cf-cli_edge_winx64.zip',
 }
 
 RELEASE_NAMES = %w{

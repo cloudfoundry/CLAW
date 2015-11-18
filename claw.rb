@@ -54,6 +54,7 @@ AVAILABLE_VERSIONS = %w{
   6.12.3
   6.12.4
   6.13.0
+  6.14.0
 }
 STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'http://go-cli.s3-website-us-east-1.amazonaws.com/releases/v%{version}/%{release}'
@@ -124,5 +125,4 @@ class Claw < Sinatra::Base
     }[release]
   end
 
-  run! if app_file == $0
-end
+  run! if app_file == $0 end

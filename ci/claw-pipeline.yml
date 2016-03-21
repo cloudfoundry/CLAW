@@ -1,0 +1,18 @@
+---
+resources:
+  - name: claw
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/CLAW
+
+jobs:
+  - name: test
+    plan:
+      - get: claw
+        trigger: true
+      - task: run-test
+        config:
+          platform: linux
+          image: docker:///ruby
+          run:
+            path: claw/ci/scripts/run-test.sh

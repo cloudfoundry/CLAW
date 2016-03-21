@@ -17,3 +17,21 @@ jobs:
           image: docker:///ruby
           run:
             path: claw/ci/scripts/run-test.sh
+
+  - name: deploy
+    plan:
+      - get: claw
+        passed: [test]
+      - task: run-deploy
+        config:
+          inputs: [name: claw]
+          platform: linux
+          image: docker:///cloudfoundry/cli-ci
+          params:
+            PWS_API: https://api.run.pivotal.io
+            PWS_USERNAME: {{cli-pws-username}}
+            PWS_PASSWORD: {{cli-pws-password}}
+            PWS_ORG: {{cli-pws-org}}
+            PWS_SPACE: {{cli-pws-space}}
+          run:
+            path: claw/ci/scripts/run-deploy.sh

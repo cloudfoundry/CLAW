@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'gabba'
 
-EDGE_LINK = 'http://go-cli.s3.amazonaws.com/master/%{file_name}'
+EDGE_LINK = 'https://go-cli.s3.amazonaws.com/master/%{file_name}'
 EDGE_ARCH_TO_FILENAMES = {
     'linux32' => 'cf-cli_edge_linux_i686.tgz',
     'linux64' => 'cf-cli_edge_linux_x86-64.tgz',

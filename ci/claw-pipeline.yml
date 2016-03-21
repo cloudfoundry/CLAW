@@ -12,6 +12,7 @@ jobs:
         trigger: true
       - task: run-test
         config:
+          inputs: [name: claw]
           platform: linux
           image: docker:///ruby
           run:

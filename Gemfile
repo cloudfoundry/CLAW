@@ -8,6 +8,5 @@ gem 'gabba'
 
 group :test, :development do
   gem 'test-unit'
-  gem 'rspec'
   gem 'rack-test'
 end

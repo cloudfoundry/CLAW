@@ -1,5 +1,9 @@
 ---
-name: claw
-command: bundle exec unicorn -p $PORT
-host: cli
-domain: run.pivotal.io
+applications:
+- name: claw
+  command: bundle exec unicorn -p $PORT
+  host: cli
+  domain: run.pivotal.io
+  env:
+    GA_DOMAIN: pivotal.io
+    GA_TRACKING_ID: UA-52116311-1

@@ -1,7 +1,6 @@
 ---
 applications:
 - name: claw
-  command: bundle exec unicorn -p $PORT
   host: cli
   domain: run.pivotal.io
   env:

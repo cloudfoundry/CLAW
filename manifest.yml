@@ -6,3 +6,5 @@ applications:
   env:
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1
+  service:
+    - claw-logs

@@ -63,6 +63,7 @@ AVAILABLE_VERSIONS = %w{
   6.17.1
   6.18.0
   6.18.1
+  6.19.0
 }
 STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'https://s3.amazonaws.com/go-cli/releases/v%{version}/%{release}'

@@ -32,6 +32,7 @@ jobs:
     plan:
       - get: claw
         passed: [test]
+        trigger: true
       - put: claw-pws
         params:
           manifest: claw/manifest.yml

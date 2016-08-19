@@ -6,10 +6,10 @@ applications:
   env:
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1
-    GPG_KEY:|
+    GPG_KEY: |
       -----BEGIN PGP PUBLIC KEY BLOCK-----
       Version: GnuPG v2
-      
+
       mQINBFe3VlEBEACu0XYYQm8TZJ9Ot3pFTRjzOcwzPh3qpWAAzjHMX0GTBqF3KldX
       janX1aMM6tpA5XWdc7Jo1w4map+6UxhD63fAKD6KZfozPC7SX4oOwm4pgfHUTzzu
       837mVtAL3IduVWRt4RpQNQS/smdZvh9edQSMxhvcgqDdiBMnQcgDu6vszk7vv5kD

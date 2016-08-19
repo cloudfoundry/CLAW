@@ -70,6 +70,7 @@ AVAILABLE_VERSIONS = %w{
 }
 STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'https://s3.amazonaws.com/go-cli/releases/v%{version}/%{release}'
+APT_REPO = 'https://s3debiantest.s3.amazonaws.com/'
 
 unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
   puts "Expected a Google Analytics env vars but they were not set"
@@ -77,7 +78,7 @@ unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
 end
 
 class Claw < Sinatra::Base
-  before do
+   before do
     @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
     accept_language = request.env['HTTP_ACCEPT_LANGUAGE']
     if accept_language
@@ -110,6 +111,22 @@ class Claw < Sinatra::Base
     redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename(release, version)}, 302
   end
 
+  get '/debian/dists/*' do
+    page = File.join('dists', params['splat'].first)
+    @google_analytics.page_view('debian', page)
+    redirect File.join(APT_REPO, page), 302
+  end
+
+  get '/debian/pool/*' do
+    page = File.join('pool', params['splat'].first)
+    @google_analytics.page_view('debian', page)
+
+    filename = page.split('/').last
+    version = /.*_(?<version>.*)_.*/.match(filename).captures.first
+
+    redirect VERSIONED_RELEASE_LINK % {version: version, release: filename}, 302
+  end
+
   def validate_stable_link_parameters(release, version)
     if !RELEASE_NAMES.include?(release)
       halt 412, "Invalid 'release' value, please select one of the following releases: #{RELEASE_NAMES.join(', ')}"
@@ -137,4 +154,5 @@ class Claw < Sinatra::Base
     }[release]
   end
 
-  run! if app_file == $0 end
+  run! if app_file == $0
+end

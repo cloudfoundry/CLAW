@@ -108,4 +108,18 @@ class ClawTest < Test::Unit::TestCase
 
     assert_equal 302, last_response.status
   end
+
+  def test_debian_dists_redirect
+    get '/debian/dists/foo'
+
+    assert_equal 302, last_response.status
+    assert_equal File.join(APT_REPO, "dists/foo"), last_response.original_headers['location']
+  end
+
+  def test_debian_pool_redirect
+    get '/debian/pool/cf_6.13.0_amd64.deb'
+    expected_link = 'https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf_6.13.0_amd64.deb'
+    assert_equal 302, last_response.status
+    assert_equal expected_link, last_response.original_headers['location']
+  end
 end

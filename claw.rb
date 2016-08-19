@@ -77,6 +77,11 @@ unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
   exit 1
 end
 
+unless ENV.has_key?('GPG_KEY')
+  puts "Expected a GPG_KEY env var but it was not set"
+  exit 1
+end
+
 class Claw < Sinatra::Base
    before do
     @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
@@ -100,6 +105,10 @@ class Claw < Sinatra::Base
 
     @google_analytics.page_view('edge', "edge/#{params['arch']}")
     redirect EDGE_LINK % {file_name: EDGE_ARCH_TO_FILENAMES[params['arch']]}, 302
+  end
+
+  get '/debian-public-key' do
+    ENV['GPG_KEY']
   end
 
   get '/stable' do

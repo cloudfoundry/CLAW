@@ -1,6 +1,7 @@
 ENV['RACK_ENV'] = 'test'
 ENV['GA_TRACKING_ID'] = 'dummy_id'
 ENV['GA_DOMAIN'] = 'dummy.domain.example.com'
+ENV['GPG_KEY'] = 'dummy-key'
 
 require_relative 'claw'
 require 'test/unit'

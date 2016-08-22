@@ -1,0 +1,6 @@
+---
+applications:
+- name: claw-redirect
+  buildpack: staticfile_buildpack
+  routes:
+  - route: cli.run.pivotal.io

@@ -89,9 +89,11 @@ class Claw < Sinatra::Base
     if accept_language
       @google_analytics.utmul = accept_language
     end
+
     @google_analytics.set_custom_var(1, 'ip', request.ip, 3)
     @google_analytics.set_custom_var(2, 'source', params['source'], 3)
     @google_analytics.set_custom_var(3, 'referer', request.referer, 3)
+    @google_analytics.set_custom_var(4, 'host', request.host, 3)
   end
 
   get '/ping' do

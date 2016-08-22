@@ -1,0 +1,65 @@
+---
+applications:
+- name: claw
+  buildpack: ruby_buildpack
+  host: cli
+  domain: run.pivotal.io
+  env:
+    GA_DOMAIN: pivotal.io
+    GA_TRACKING_ID: UA-52116311-1
+    GPG_KEY: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: GnuPG v2
+
+      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
+      FAvsuEGTsB4itBk1dQ==
+      =K06m
+      -----END PGP PUBLIC KEY BLOCK-----
+
+  services:
+    - claw-logs

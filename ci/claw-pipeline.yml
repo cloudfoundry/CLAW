@@ -5,7 +5,7 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/CLAW
 
-- name: claw-pws
+- name: claw-redirect-pws
   type: cf
   source:
     api: https://api.run.pivotal.io
@@ -13,6 +13,16 @@ resources:
     password: {{cli-pws-password}}
     organization: {{cli-pws-org}}
     space: {{cli-pws-space}}
+    skip_cert_check: false
+
+- name: claw-pws
+  type: cf
+  source:
+    api: https://api.run.pivotal.io
+    username: {{cli-pws-username}}
+    password: {{cli-pws-password}}
+    organization: {{cli-pws-oss-org}}
+    space: {{cli-pws-oss-space}}
     skip_cert_check: false
 
 jobs:
@@ -33,6 +43,11 @@ jobs:
       - get: claw
         passed: [test]
         trigger: true
+      - put: claw-redirect-pws
+        params:
+          manifest: claw/redirect/manifest.yml
+          path: claw/redirect
+          current_app_name: claw-redirect
       - put: claw-pws
         params:
           manifest: claw/manifest.yml

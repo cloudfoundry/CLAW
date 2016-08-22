@@ -2,8 +2,8 @@
 applications:
 - name: claw
   buildpack: ruby_buildpack
-  routes:
-  - route: packages.cloudfoundry.org
+  host: packages
+  domain: cloudfoundry.org
   env:
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1

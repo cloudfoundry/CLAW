@@ -133,9 +133,16 @@ class Claw < Sinatra::Base
     @google_analytics.page_view('debian', page)
 
     filename = page.split('/').last
-    version = /.*_(?<version>.*)_.*/.match(filename).captures.first
-
+    has_version = /.*_(?<version>.*)_.*/.match(filename)
+    if !has_version.nil?
+      version=has_version.captures.first
     redirect VERSIONED_RELEASE_LINK % {version: version, release: filename}, 302
+    else
+      version=STABLE_VERSION
+      release=filename.split('=').last
+    redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename(release,version)}, 302
+    end
+
   end
 
   def validate_stable_link_parameters(release, version)

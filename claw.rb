@@ -70,7 +70,7 @@ AVAILABLE_VERSIONS = %w{
 }
 STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
-APT_REPO = 'https://cf-cli-debian.s3.amazonaws.com/'
+APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
 
 unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
   puts "Expected a Google Analytics env vars but they were not set"

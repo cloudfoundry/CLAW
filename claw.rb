@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'gabba'
 
-EDGE_LINK = 'https://go-cli.s3.amazonaws.com/master/%{file_name}'
+EDGE_LINK = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
 EDGE_ARCH_TO_FILENAMES = {
     'linux32' => 'cf-cli_edge_linux_i686.tgz',
     'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
@@ -69,7 +69,7 @@ AVAILABLE_VERSIONS = %w{
   6.21.1
 }
 STABLE_VERSION = AVAILABLE_VERSIONS.last
-VERSIONED_RELEASE_LINK = 'https://s3.amazonaws.com/go-cli/releases/v%{version}/%{release}'
+VERSIONED_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
 APT_REPO = 'https://cf-cli-debian.s3.amazonaws.com/'
 
 unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')

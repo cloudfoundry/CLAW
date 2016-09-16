@@ -124,4 +124,25 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 302, last_response.status
     assert_equal expected_link, last_response.original_headers['location']
   end
+
+  def test_fedora_repodata_redirect
+    get '/fedora/repodata/foo'
+
+    assert_equal 302, last_response.status
+    assert_equal File.join(RPM_REPO, "repodata/foo"), last_response.original_headers['location']
+  end
+
+  def test_fedora_repofile_redirect
+    get '/fedora/cloudfoundry-cli.repo'
+
+    assert_equal 302, last_response.status
+    assert_equal File.join(RPM_REPO, "cloudfoundry-cli.repo"), last_response.original_headers['location']
+  end
+
+  def test_fedora_releases_redirect
+    get 'fedora/releases/cf_6.13.0_amd64.rpm'
+    expected_link = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf_6.13.0_amd64.rpm'
+    assert_equal 302, last_response.status
+    assert_equal expected_link, last_response.original_headers['location']
+  end
 end

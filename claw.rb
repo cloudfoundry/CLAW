@@ -29,6 +29,7 @@ AVAILABLE_VERSIONS =ENV['AVAILABLE_VERSIONS'].split(",")
 STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
 APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
+RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
 
 unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
   puts "Expected a Google Analytics env vars but they were not set"
@@ -86,6 +87,17 @@ class Claw < Sinatra::Base
     redirect File.join(APT_REPO, page), 302
   end
 
+  get '/fedora/cloudfoundry-cli.repo' do
+    @google_analytics.page_view('fedora', 'cloudfoundry-cli.repo')
+    redirect File.join(RPM_REPO, 'cloudfoundry-cli.repo'), 302
+  end
+
+  get '/fedora/repodata/*' do
+    page = File.join('repodata', params['splat'].first)
+    @google_analytics.page_view('fedora', page)
+    redirect File.join(RPM_REPO, page), 302
+  end
+
   get '/debian/pool/*' do
     page = File.join('pool', params['splat'].first)
     @google_analytics.page_view('debian', page)
@@ -100,7 +112,16 @@ class Claw < Sinatra::Base
       release=filename.split('=').last
     redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename(release,version)}, 302
     end
+  end
 
+  get '/fedora/releases/*' do
+    page = File.join('releases', params['splat'].first)
+    @google_analytics.page_view('fedora', page)
+
+    filename = page.split('/').last
+    has_version = /.*_(?<version>.*)_.*/.match(filename)
+    version=has_version.captures.first
+    redirect VERSIONED_RELEASE_LINK % {version: version, release: filename}, 302
   end
 
   def validate_stable_link_parameters(release, version)

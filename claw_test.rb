@@ -43,18 +43,18 @@ class ClawTest < Test::Unit::TestCase
 
   def test_stable_with_release_and_without_version_redirects_to_latest
     {
-      "debian32" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_i686.deb",
-      "debian64" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_x86-64.deb",
-      "redhat32" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_i686.rpm",
-      "redhat64" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_x86-64.rpm",
-      "macosx64" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_osx.pkg",
-      "windows32" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_win32.zip",
-      "windows64" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_winx64.zip",
-      "linux32-binary" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_i686.tgz",
-      "linux64-binary" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_x86-64.tgz",
-      "macosx64-binary" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_osx.tgz",
-      "windows32-exe" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_win32.zip",
-      "windows64-exe" => "https://s3.amazonaws.com/go-cli/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_winx64.zip",
+      "debian32" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_i686.deb",
+      "debian64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_x86-64.deb",
+      "redhat32" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_i686.rpm",
+      "redhat64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_x86-64.rpm",
+      "macosx64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_osx.pkg",
+      "windows32" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_win32.zip",
+      "windows64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_winx64.zip",
+      "linux32-binary" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_i686.tgz",
+      "linux64-binary" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_x86-64.tgz",
+      "macosx64-binary" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_osx.tgz",
+      "windows32-exe" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_win32.zip",
+      "windows64-exe" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_winx64.zip",
     }.each { |release, expected_link|
       get '/stable', 'release' => release
 
@@ -78,18 +78,18 @@ class ClawTest < Test::Unit::TestCase
 
   def test_stable_with_release_and_version_redirects
     {
-      "debian32" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli-installer_6.13.0_i686.deb",
-      "debian64" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli-installer_6.13.0_x86-64.deb",
-      "redhat32" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli-installer_6.13.0_i686.rpm",
-      "redhat64" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli-installer_6.13.0_x86-64.rpm",
-      "macosx64" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli-installer_6.13.0_osx.pkg",
-      "windows32" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli-installer_6.13.0_win32.zip",
-      "windows64" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli-installer_6.13.0_winx64.zip",
-      "linux32-binary" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli_6.13.0_linux_i686.tgz",
-      "linux64-binary" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli_6.13.0_linux_x86-64.tgz",
-      "macosx64-binary" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli_6.13.0_osx.tgz",
-      "windows32-exe" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli_6.13.0_win32.zip",
-      "windows64-exe" => "https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf-cli_6.13.0_winx64.zip",
+      "debian32" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_i686.deb",
+      "debian64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_x86-64.deb",
+      "redhat32" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_i686.rpm",
+      "redhat64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_x86-64.rpm",
+      "macosx64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_osx.pkg",
+      "windows32" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_win32.zip",
+      "windows64" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_winx64.zip",
+      "linux32-binary" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_linux_i686.tgz",
+      "linux64-binary" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_linux_x86-64.tgz",
+      "macosx64-binary" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_osx.tgz",
+      "windows32-exe" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_win32.zip",
+      "windows64-exe" => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_winx64.zip",
     }.each { |release, expected_link|
       get '/stable', 'release' => release, 'version' => '6.13.0'
 
@@ -120,7 +120,7 @@ class ClawTest < Test::Unit::TestCase
 
   def test_debian_pool_redirect
     get '/debian/pool/cf_6.13.0_amd64.deb'
-    expected_link = 'https://s3.amazonaws.com/go-cli/releases/v6.13.0/cf_6.13.0_amd64.deb'
+    expected_link = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf_6.13.0_amd64.deb'
     assert_equal 302, last_response.status
     assert_equal expected_link, last_response.original_headers['location']
   end

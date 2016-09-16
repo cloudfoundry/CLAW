@@ -25,49 +25,7 @@ RELEASE_NAMES = %w{
   windows64-exe
 }
 
-AVAILABLE_VERSIONS = %w{
-  6.0.2
-  6.1.0
-  6.1.1
-  6.1.2
-  6.2.0
-  6.3.0
-  6.3.1
-  6.3.2
-  6.4.0
-  6.5.0
-  6.5.1
-  6.6.0
-  6.6.1
-  6.6.2
-  6.7.0
-  6.8.0
-  6.9.0
-  6.10.0
-  6.11.0
-  6.11.1
-  6.11.2
-  6.11.3
-  6.12.0
-  6.12.1
-  6.12.2
-  6.12.3
-  6.12.4
-  6.13.0
-  6.14.0
-  6.14.1
-  6.15.0
-  6.16.0
-  6.16.1
-  6.17.0
-  6.17.1
-  6.18.0
-  6.18.1
-  6.19.0
-  6.20.0
-  6.21.0
-  6.21.1
-}
+AVAILABLE_VERSIONS =ENV['AVAILABLE_VERSIONS'].split(",")
 STABLE_VERSION = AVAILABLE_VERSIONS.last
 VERSIONED_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
 APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'

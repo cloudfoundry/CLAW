@@ -34,7 +34,7 @@ jobs:
         config:
           inputs: [name: claw]
           platform: linux
-          image: "docker:///ruby#2.3.0"
+          image: "docker:///ruby#2.3.1"
           run:
             path: claw/ci/scripts/run-test.sh
 

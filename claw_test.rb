@@ -145,4 +145,20 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 302, last_response.status
     assert_equal expected_link, last_response.original_headers['location']
   end
+
+  def test_gpg_key_debian
+    get '/debian/cli.cloudfoundry.org.key'
+
+    assert_equal 200, last_response.status
+    assert_equal last_response.body, 'dummy-key'
+    assert_equal last_response.header["Content-Type"], 'text/plain;charset=utf-8'
+  end
+
+  def test_gpg_key_redhat
+    get '/redhat/cli.cloudfoundry.org.key'
+
+    assert_equal 200, last_response.status
+    assert_equal last_response.body, 'dummy-key'
+    assert_equal last_response.header["Content-Type"], 'text/plain;charset=utf-8'
+  end
 end

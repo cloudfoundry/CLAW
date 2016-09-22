@@ -47,9 +47,7 @@ jobs:
         params:
           manifest: claw/manifest-pivotal.yml
           path: claw
-          current_app_name: claw
       - put: claw-pws-oss
         params:
           manifest: claw/manifest-oss.yml
           path: claw
-          current_app_name: claw

@@ -68,7 +68,7 @@ class Claw < Sinatra::Base
     redirect EDGE_LINK % {file_name: EDGE_ARCH_TO_FILENAMES[params['arch']]}, 302
   end
 
-  get /\/(debian|redhat)\/cli\.cloudfoundry\.org\.key/ do
+  get /\/(debian|fedora)\/cli\.cloudfoundry\.org\.key/ do
     content_type :text
     ENV['GPG_KEY']
   end

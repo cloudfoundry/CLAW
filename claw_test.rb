@@ -155,7 +155,7 @@ class ClawTest < Test::Unit::TestCase
   end
 
   def test_gpg_key_redhat
-    get '/redhat/cli.cloudfoundry.org.key'
+    get '/fedora/cli.cloudfoundry.org.key'
 
     assert_equal 200, last_response.status
     assert_equal last_response.body, 'dummy-key'

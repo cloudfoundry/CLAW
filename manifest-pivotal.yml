@@ -2,8 +2,9 @@
 applications:
 - name: claw
   buildpack: ruby_buildpack
-  host: cli
-  domain: run.pivotal.io
+  instances: 2
+  routes:
+    - route: cli.run.pivotal.io
   env:
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1
@@ -60,6 +61,5 @@ applications:
       Yx//rQWfa2OcCy9lkg==
       =CBBi
       -----END PGP PUBLIC KEY BLOCK-----
-
   services:
     - claw-logs

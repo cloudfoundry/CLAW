@@ -2,8 +2,9 @@
 applications:
 - name: claw
   buildpack: ruby_buildpack
-  host: packages
-  domain: cloudfoundry.org
+  instances: 2
+  routes:
+    - route: packages.cloudfoundry.org
   env:
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1
@@ -60,7 +61,5 @@ applications:
       Yx//rQWfa2OcCy9lkg==
       =CBBi
       -----END PGP PUBLIC KEY BLOCK-----
-
-
   services:
     - claw-logs

@@ -11,7 +11,7 @@ resources:
     api: https://api.run.pivotal.io
     username: {{cli-pws-username}}
     password: {{cli-pws-password}}
-    organization: {{cli-pws-org}}
+    organization: {{cli-pws-organization}}
     space: {{cli-pws-space}}
     skip_cert_check: false
 
@@ -21,7 +21,7 @@ resources:
     api: https://api.run.pivotal.io
     username: {{cli-pws-username}}
     password: {{cli-pws-password}}
-    organization: {{cli-pws-oss-org}}
+    organization: {{cli-pws-oss-organization}}
     space: {{cli-pws-oss-space}}
     skip_cert_check: false
 

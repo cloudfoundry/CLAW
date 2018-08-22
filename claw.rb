@@ -41,6 +41,11 @@ unless ENV.has_key?('GPG_KEY')
   exit 1
 end
 
+unless ENV.has_key?('AVAILABLE_VERSIONS')
+  puts "AVAILABLE_VERSIONS not set, please set it before proceeding."
+  exit 1
+end
+
 class Claw < Sinatra::Base
    before do
     @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)

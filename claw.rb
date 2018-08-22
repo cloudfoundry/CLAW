@@ -83,10 +83,13 @@ class Claw < Sinatra::Base
   end
 
   get '/homebrew/cf-*.tgz' do |version|
+    @google_analytics.set_custom_var(2, 'source', "homebrew", 3)
+
     if !AVAILABLE_VERSIONS.include?(version)
       halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
 
+    @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
     redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename('macosx64-binary', version)}, 302
   end
 

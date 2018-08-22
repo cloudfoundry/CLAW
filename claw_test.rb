@@ -111,6 +111,23 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 302, last_response.status
   end
 
+  def test_valid_homebrew_url_redirects_to_osx_tgz
+    get '/homebrew/cf-6.12.4.tgz'
+
+    assert_equal 302, last_response.status
+    assert_equal VERSIONED_RELEASE_LINK % {version: "6.12.4", release: "cf-cli_6.12.4_osx.tgz"}, last_response.original_headers['location']
+  end
+
+  def test_invalid_homebrew_url_returns_412
+    get '/homebrew/cf-garbage.tgz'
+    assert_equal 412, last_response.status
+  end
+
+  def test_unavailable_homebrew_url_returns_412
+    get '/homebrew/cf-9.0.0.tgz'
+    assert_equal 412, last_response.status
+  end
+
   def test_debian_dists_redirect
     get '/debian/dists/foo'
 

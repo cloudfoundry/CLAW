@@ -82,6 +82,14 @@ class Claw < Sinatra::Base
     redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename(release, version)}, 302
   end
 
+  get '/homebrew/cf-*.tgz' do |version|
+    if !AVAILABLE_VERSIONS.include?(version)
+      halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
+    end
+
+    redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename('macosx64-binary', version)}, 302
+  end
+
   get '/debian/dists/*' do
     page = File.join('dists', params['splat'].first)
     @google_analytics.page_view('debian', page)

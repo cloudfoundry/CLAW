@@ -136,7 +136,7 @@ class Claw < Sinatra::Base
     @google_analytics.page_view('fedora', page)
 
     filename = page.split('/').last
-    has_version = /.*_(?<version>.*)_.*/.match(filename)
+    has_version = /.*_(?<version>[\d.]+)_.*/.match(filename)
     version=has_version.captures.first
     redirect VERSIONED_RELEASE_LINK % {version: version, release: filename}, 302
   end

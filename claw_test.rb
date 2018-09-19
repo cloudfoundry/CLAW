@@ -163,6 +163,13 @@ class ClawTest < Test::Unit::TestCase
     assert_equal expected_link, last_response.original_headers['location']
   end
 
+  def test_fedora_releases_redirect_with_linux_in_filename
+    get 'fedora/releases/v6.13.0/cf-cli-installer_6.13.0_linux_x86-64.rpm'
+    expected_link = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_linux_x86-64.rpm'
+    assert_equal 302, last_response.status
+    assert_equal expected_link, last_response.original_headers['location']
+  end
+
   def test_gpg_key_debian
     get '/debian/cli.cloudfoundry.org.key'
 

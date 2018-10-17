@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'gabba'
+require 'semantic'
 
 EDGE_LINK = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
 EDGE_ARCH_TO_FILENAMES = {
@@ -26,8 +27,19 @@ RELEASE_NAMES = %w{
 }
 
 AVAILABLE_VERSIONS =ENV['AVAILABLE_VERSIONS'].split(",")
-STABLE_VERSION = AVAILABLE_VERSIONS.last
-VERSIONED_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
+STABLE_VERSION = AVAILABLE_VERSIONS
+                   .map { |version| Semantic::Version.new(version)}
+                   .reject { |version| version.major == 7}
+                   .last
+                   .to_s
+STABLE_V7_VERSION = AVAILABLE_VERSIONS
+                      .map {|version| Semantic::Version.new(version)}
+                      .select {|version| version.major == 7}
+                      .max
+                      .to_s
+
+VERSIONED_V6_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
+VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf7-cli-releases/releases/v%{version}/%{release}'
 APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
 RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
 
@@ -79,12 +91,17 @@ class Claw < Sinatra::Base
   end
 
   get '/stable' do
-    version = params['version'] || STABLE_VERSION
+    version = params['version']
+    version = STABLE_VERSION unless version
+    base_link = VERSIONED_V6_RELEASE_LINK
+    version = STABLE_V7_VERSION if version == 'v7'
+    base_link = VERSIONED_V7_RELEASE_LINK if params['version'] == 'v7'
+
     release = params['release']
     validate_stable_link_parameters(release, version)
 
     @google_analytics.page_view('stable', "stable/#{params['release']}/#{version}")
-    redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename(release, version)}, 302
+    redirect base_link % {version: version, release: release_to_filename(release, version)}, 302
   end
 
   get '/homebrew/cf-*.tgz' do |version|
@@ -95,7 +112,7 @@ class Claw < Sinatra::Base
     end
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
-    redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename('macosx64-binary', version)}, 302
+    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: release_to_filename('macosx64-binary', version)}, 302
   end
 
   get '/debian/dists/*' do
@@ -123,11 +140,11 @@ class Claw < Sinatra::Base
     has_version = /.*_(?<version>.*)_.*/.match(filename)
     if !has_version.nil?
       version=has_version.captures.first
-    redirect VERSIONED_RELEASE_LINK % {version: version, release: filename}, 302
+    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: filename}, 302
     else
       version=STABLE_VERSION
       release=filename.split('=').last
-    redirect VERSIONED_RELEASE_LINK % {version: version, release: release_to_filename(release,version)}, 302
+    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: release_to_filename(release,version)}, 302
     end
   end
 
@@ -138,7 +155,7 @@ class Claw < Sinatra::Base
     filename = page.split('/').last
     has_version = /.*_(?<version>[\d.]+)_.*/.match(filename)
     version=has_version.captures.first
-    redirect VERSIONED_RELEASE_LINK % {version: version, release: filename}, 302
+    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: filename}, 302
   end
 
   def validate_stable_link_parameters(release, version)

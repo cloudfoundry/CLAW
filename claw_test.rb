@@ -2,7 +2,7 @@ ENV['RACK_ENV'] = 'test'
 ENV['GA_TRACKING_ID'] = 'dummy_id'
 ENV['GA_DOMAIN'] = 'dummy.domain.example.com'
 ENV['GPG_KEY'] = 'dummy-key'
-ENV['AVAILABLE_VERSIONS'] = '6.12.4,6.13.0'
+ENV['AVAILABLE_VERSIONS'] = '6.12.4,6.13.0,7.0.0-beta.1'
 
 require_relative 'claw'
 require 'test/unit'
@@ -104,6 +104,28 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 412, last_response.status
   end
 
+  #   test_stable_without_version_does_not_accidentally_ship_v7
+  def test_stable_without_version_redirects_to_v6
+    get 'stable', 'release' => 'macosx64-binary'
+
+    assert_equal 302, last_response.status
+    assert_equal "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_osx.tgz", last_response.original_headers['location']
+  end
+
+  def test_stable_with_v7_redirects_to_latest_v7
+    get 'stable', 'release' => 'macosx64-binary', 'version' => 'v7'
+
+    assert_equal 302, last_response.status
+    assert_equal "https://s3-us-west-1.amazonaws.com/cf7-cli-releases/releases/v7.0.0-beta.1/cf-cli_7.0.0-beta.1_osx.tgz", last_response.original_headers['location']
+  end
+
+  def test_stable_with_explicit_v7_version_redirects
+    get 'stable', 'release' => 'macosx64-binary', 'version' => '7.0.0-beta.1'
+
+    assert_equal 302, last_response.status
+    assert_equal "https://s3-us-west-1.amazonaws.com/cf7-cli-releases/releases/v7.0.0-beta.1/cf-cli_7.0.0-beta.1_osx.tgz", last_response.original_headers['location']
+  end
+
   def test_stable_with_http_accept_language_redirects
     header 'Accept-Language', 'da, en-gb;q=0.8, en;q=0.7'
     get 'stable', {'release' => 'windows64', 'version' => '6.12.4'}
@@ -115,7 +137,7 @@ class ClawTest < Test::Unit::TestCase
     get '/homebrew/cf-6.12.4.tgz'
 
     assert_equal 302, last_response.status
-    assert_equal VERSIONED_RELEASE_LINK % {version: "6.12.4", release: "cf-cli_6.12.4_osx.tgz"}, last_response.original_headers['location']
+    assert_equal VERSIONED_V6_RELEASE_LINK % {version: "6.12.4", release: "cf-cli_6.12.4_osx.tgz"}, last_response.original_headers['location']
   end
 
   def test_invalid_homebrew_url_returns_412

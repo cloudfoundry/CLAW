@@ -1,17 +1,28 @@
+# frozen_string_literal: true
+
 require 'sinatra'
 require 'gabba'
 require 'semantic'
 
 EDGE_LINK = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+EDGE_LINK_V7 = 'https://v7-cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
 EDGE_ARCH_TO_FILENAMES = {
-    'linux32' => 'cf-cli_edge_linux_i686.tgz',
-    'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
-    'macosx64' => 'cf-cli_edge_osx.tgz',
-    'windows32' => 'cf-cli_edge_win32.zip',
-    'windows64' => 'cf-cli_edge_winx64.zip',
-}
+  'linux32' => 'cf-cli_edge_linux_i686.tgz',
+  'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
+  'macosx64' => 'cf-cli_edge_osx.tgz',
+  'windows32' => 'cf-cli_edge_win32.zip',
+  'windows64' => 'cf-cli_edge_winx64.zip'
+}.freeze
 
-RELEASE_NAMES = %w{
+EDGE_ARCH_TO_V7_FILENAMES = {
+  'linux32' => 'cf7-cli_edge_linux_i686.tgz',
+  'linux64' => 'cf7-cli_edge_linux_x86-64.tgz',
+  'macosx64' => 'cf7-cli_edge_osx.tgz',
+  'windows32' => 'cf7-cli_edge_win32.zip',
+  'windows64' => 'cf7-cli_edge_winx64.zip'
+}.freeze
+
+RELEASE_NAMES = %w[
   debian32
   debian64
   redhat32
@@ -24,47 +35,45 @@ RELEASE_NAMES = %w{
   macosx64-binary
   windows32-exe
   windows64-exe
-}
+].freeze
 
-AVAILABLE_VERSIONS =ENV['AVAILABLE_VERSIONS'].split(",")
+AVAILABLE_VERSIONS = ENV['AVAILABLE_VERSIONS'].split(',')
 STABLE_VERSION = AVAILABLE_VERSIONS
-                   .map { |version| Semantic::Version.new(version)}
-                   .reject { |version| version.major == 7}
-                   .last
-                   .to_s
+                 .map { |version| Semantic::Version.new(version) }
+                 .reject { |version| version.major == 7 }
+                 .last
+                 .to_s
 STABLE_V7_VERSION = AVAILABLE_VERSIONS
-                      .map {|version| Semantic::Version.new(version)}
-                      .select {|version| version.major == 7}
-                      .max
-                      .to_s
+                    .map { |version| Semantic::Version.new(version) }
+                    .select { |version| version.major == 7 }
+                    .max
+                    .to_s
 
 VERSIONED_V6_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
-VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf7-cli-releases/releases/v%{version}/%{release}'
+VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v%{version}/%{release}'
 APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
 RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
 
-unless ENV.has_key?('GA_TRACKING_ID') && ENV.has_key?('GA_DOMAIN')
-  puts "Expected a Google Analytics env vars but they were not set"
+unless ENV.key?('GA_TRACKING_ID') && ENV.key?('GA_DOMAIN')
+  puts 'Expected a Google Analytics env vars but they were not set'
   exit 1
 end
 
-unless ENV.has_key?('GPG_KEY')
-  puts "Expected a GPG_KEY env var but it was not set"
+unless ENV.key?('GPG_KEY')
+  puts 'Expected a GPG_KEY env var but it was not set'
   exit 1
 end
 
-unless ENV.has_key?('AVAILABLE_VERSIONS')
-  puts "AVAILABLE_VERSIONS not set, please set it before proceeding."
+unless ENV.key?('AVAILABLE_VERSIONS')
+  puts 'AVAILABLE_VERSIONS not set, please set it before proceeding.'
   exit 1
 end
 
 class Claw < Sinatra::Base
-   before do
+  before do
     @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
     accept_language = request.env['HTTP_ACCEPT_LANGUAGE']
-    if accept_language
-      @google_analytics.utmul = accept_language
-    end
+    @google_analytics.utmul = accept_language if accept_language
 
     @google_analytics.set_custom_var(1, 'ip', request.ip, 3)
     @google_analytics.set_custom_var(2, 'source', params['source'], 3)
@@ -77,12 +86,13 @@ class Claw < Sinatra::Base
   end
 
   get '/edge' do
-    if !params.has_key?('arch') || EDGE_ARCH_TO_FILENAMES[params['arch']].nil?
-      halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_FILENAMES.keys.join(', ')}"
-    end
-
+    redirect_link = if params['version'] == 'v7'
+                      get_edge_redirect_link(params, EDGE_ARCH_TO_V7_FILENAMES, EDGE_LINK_V7)
+                    else
+                      get_edge_redirect_link(params, EDGE_ARCH_TO_FILENAMES, EDGE_LINK)
+                    end
     @google_analytics.page_view('edge', "edge/#{params['arch']}")
-    redirect EDGE_LINK % {file_name: EDGE_ARCH_TO_FILENAMES[params['arch']]}, 302
+    redirect redirect_link, 302
   end
 
   get /\/(debian|fedora)\/cli\.cloudfoundry\.org\.key/ do
@@ -91,28 +101,20 @@ class Claw < Sinatra::Base
   end
 
   get '/stable' do
-    version = params['version']
-    version = STABLE_VERSION unless version
-    base_link = VERSIONED_V6_RELEASE_LINK
-    version = STABLE_V7_VERSION if version == 'v7'
-    base_link = VERSIONED_V7_RELEASE_LINK if params['version'] == 'v7'
-
-    release = params['release']
-    validate_stable_link_parameters(release, version)
-
-    @google_analytics.page_view('stable', "stable/#{params['release']}/#{version}")
-    redirect base_link % {version: version, release: release_to_filename(release, version)}, 302
+    redirect_url = get_stable_redirect_link(params['version'], params['release'])
+    @google_analytics.page_view('stable', "stable/#{params['release']}/#{params['version']}")
+    redirect redirect_url, 302
   end
 
   get '/homebrew/cf-*.tgz' do |version|
-    @google_analytics.set_custom_var(2, 'source', "homebrew", 3)
+    @google_analytics.set_custom_var(2, 'source', 'homebrew', 3)
 
-    if !AVAILABLE_VERSIONS.include?(version)
+    unless AVAILABLE_VERSIONS.include?(version)
       halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
-    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: release_to_filename('macosx64-binary', version)}, 302
+    redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
   end
 
   get '/debian/dists/*' do
@@ -139,12 +141,12 @@ class Claw < Sinatra::Base
     filename = page.split('/').last
     has_version = /.*_(?<version>.*)_.*/.match(filename)
     if !has_version.nil?
-      version=has_version.captures.first
-    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: filename}, 302
+      version = has_version.captures.first
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: filename), 302
     else
-      version=STABLE_VERSION
-      release=filename.split('=').last
-    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: release_to_filename(release,version)}, 302
+      version = STABLE_VERSION
+      release = filename.split('=').last
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename(release, version)), 302
     end
   end
 
@@ -154,16 +156,16 @@ class Claw < Sinatra::Base
 
     filename = page.split('/').last
     has_version = /.*_(?<version>[\d.]+)_.*/.match(filename)
-    version=has_version.captures.first
-    redirect VERSIONED_V6_RELEASE_LINK % {version: version, release: filename}, 302
+    version = has_version.captures.first
+    redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: filename), 302
   end
 
   def validate_stable_link_parameters(release, version)
-    if !RELEASE_NAMES.include?(release)
+    unless RELEASE_NAMES.include?(release)
       halt 412, "Invalid 'release' value, please select one of the following releases: #{RELEASE_NAMES.join(', ')}"
     end
 
-    if !AVAILABLE_VERSIONS.include?(version)
+    unless AVAILABLE_VERSIONS.include?(version)
       halt 412, "Invalid 'version' value, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
   end
@@ -181,9 +183,54 @@ class Claw < Sinatra::Base
       'linux64-binary' => "cf-cli_#{version}_linux_x86-64.tgz",
       'macosx64-binary' => "cf-cli_#{version}_osx.tgz",
       'windows32-exe' => "cf-cli_#{version}_win32.zip",
-      'windows64-exe' => "cf-cli_#{version}_winx64.zip",
+      'windows64-exe' => "cf-cli_#{version}_winx64.zip"
     }[release]
   end
 
-  run! if app_file == $0
+  def release_to_v7_filename(release, version)
+    {
+      'debian32' => "cf7-cli-installer_#{version}_i686.deb",
+      'debian64' => "cf7-cli-installer_#{version}_x86-64.deb",
+      'redhat32' => "cf7-cli-installer_#{version}_i686.rpm",
+      'redhat64' => "cf7-cli-installer_#{version}_x86-64.rpm",
+      'macosx64' => "cf7-cli-installer_#{version}_osx.pkg",
+      'windows32' => "cf7-cli-installer_#{version}_win32.zip",
+      'windows64' => "cf7-cli-installer_#{version}_winx64.zip",
+      'linux32-binary' => "cf7-cli_#{version}_linux_i686.tgz",
+      'linux64-binary' => "cf7-cli_#{version}_linux_x86-64.tgz",
+      'macosx64-binary' => "cf7-cli_#{version}_osx.tgz",
+      'windows32-exe' => "cf7-cli_#{version}_win32.zip",
+      'windows64-exe' => "cf7-cli_#{version}_winx64.zip"
+    }[release]
+  end
+
+  def get_edge_redirect_link(params, arch_to_filenames, edge_link)
+    if !params.key?('arch') || EDGE_ARCH_TO_FILENAMES[params['arch']].nil?
+      halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_FILENAMES.keys.join(', ')}"
+    end
+
+    format(edge_link, file_name: arch_to_filenames[params['arch']])
+  end
+
+  def get_stable_redirect_link(version, release)
+    if version.nil?
+      version = STABLE_VERSION
+    elsif version == 'v7'
+      version = STABLE_V7_VERSION
+    end
+
+    validate_stable_link_parameters(release, version)
+
+    if Semantic::Version.new(version).major == 7
+      url = VERSIONED_V7_RELEASE_LINK
+      filename = release_to_v7_filename(release, version)
+    else
+      url = VERSIONED_V6_RELEASE_LINK
+      filename = release_to_filename(release, version)
+    end
+
+    format(url, version: version, release: filename)
+  end
+
+  run! if app_file == $PROGRAM_NAME
 end

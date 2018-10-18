@@ -1,3 +1,5 @@
-require_relative "claw"
+# frozen_string_literal: true
+
+require_relative 'claw'
 
 run Claw

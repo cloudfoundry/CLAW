@@ -173,6 +173,13 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 412, last_response.status
   end
 
+  def test_valid_homebrew_url_redirects_to_osx_tgz_v7
+    get '/homebrew/cf-7.0.0-beta.1.tgz'
+
+    assert_equal 302, last_response.status
+    assert_equal format(VERSIONED_V7_RELEASE_LINK, version: '7.0.0-beta.1', release: 'cf7-cli_7.0.0-beta.1_osx.tgz'), last_response.original_headers['location']
+  end
+
   def test_debian_dists_redirect
     get '/debian/dists/foo'
 

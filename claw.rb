@@ -114,7 +114,11 @@ class Claw < Sinatra::Base
     end
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
-    redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+    if Semantic::Version.new(version).major == 7
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_v7_filename('macosx64-binary', version)), 302
+    else
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+    end
   end
 
   get '/debian/dists/*' do

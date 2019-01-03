@@ -3,6 +3,7 @@ applications:
 - name: claw
   buildpack: ruby_buildpack
   instances: 2
+  stack: cflinuxfs3
   routes:
     - route: cli.run.pivotal.io
   env:

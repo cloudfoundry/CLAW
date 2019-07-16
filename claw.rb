@@ -115,7 +115,7 @@ class Claw < Sinatra::Base
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
     if Semantic::Version.new(version).major == 7
-      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_v7_filename('macosx64-binary', version)), 302
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
     else
       redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
     end
@@ -191,23 +191,6 @@ class Claw < Sinatra::Base
     }[release]
   end
 
-  def release_to_v7_filename(release, version)
-    {
-      'debian32' => "cf7-cli-installer_#{version}_i686.deb",
-      'debian64' => "cf7-cli-installer_#{version}_x86-64.deb",
-      'redhat32' => "cf7-cli-installer_#{version}_i686.rpm",
-      'redhat64' => "cf7-cli-installer_#{version}_x86-64.rpm",
-      'macosx64' => "cf7-cli-installer_#{version}_osx.pkg",
-      'windows32' => "cf7-cli-installer_#{version}_win32.zip",
-      'windows64' => "cf7-cli-installer_#{version}_winx64.zip",
-      'linux32-binary' => "cf7-cli_#{version}_linux_i686.tgz",
-      'linux64-binary' => "cf7-cli_#{version}_linux_x86-64.tgz",
-      'macosx64-binary' => "cf7-cli_#{version}_osx.tgz",
-      'windows32-exe' => "cf7-cli_#{version}_win32.zip",
-      'windows64-exe' => "cf7-cli_#{version}_winx64.zip"
-    }[release]
-  end
-
   def get_edge_redirect_link(params, arch_to_filenames, edge_link)
     if !params.key?('arch') || EDGE_ARCH_TO_FILENAMES[params['arch']].nil?
       halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_FILENAMES.keys.join(', ')}"
@@ -227,7 +210,7 @@ class Claw < Sinatra::Base
 
     if Semantic::Version.new(version).major == 7
       url = VERSIONED_V7_RELEASE_LINK
-      filename = release_to_v7_filename(release, version)
+      filename = release_to_filename(release, version)
     else
       url = VERSIONED_V6_RELEASE_LINK
       filename = release_to_filename(release, version)

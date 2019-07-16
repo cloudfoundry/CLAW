@@ -139,14 +139,14 @@ class ClawTest < Test::Unit::TestCase
     get 'stable', 'release' => 'macosx64-binary', 'version' => 'v7'
 
     assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.1/cf7-cli_7.0.0-beta.1_osx.tgz', last_response.original_headers['location']
+    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.1/cf-cli_7.0.0-beta.1_osx.tgz', last_response.original_headers['location']
   end
 
   def test_stable_with_explicit_v7_version_redirects
     get 'stable', 'release' => 'macosx64-binary', 'version' => '7.0.0-beta.1'
 
     assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.1/cf7-cli_7.0.0-beta.1_osx.tgz', last_response.original_headers['location']
+    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.1/cf-cli_7.0.0-beta.1_osx.tgz', last_response.original_headers['location']
   end
 
   def test_stable_with_http_accept_language_redirects
@@ -177,7 +177,7 @@ class ClawTest < Test::Unit::TestCase
     get '/homebrew/cf-7.0.0-beta.1.tgz'
 
     assert_equal 302, last_response.status
-    assert_equal format(VERSIONED_V7_RELEASE_LINK, version: '7.0.0-beta.1', release: 'cf7-cli_7.0.0-beta.1_osx.tgz'), last_response.original_headers['location']
+    assert_equal format(VERSIONED_V7_RELEASE_LINK, version: '7.0.0-beta.1', release: 'cf-cli_7.0.0-beta.1_osx.tgz'), last_response.original_headers['location']
   end
 
   def test_debian_dists_redirect

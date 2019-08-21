@@ -4,7 +4,7 @@ ENV['RACK_ENV'] = 'test'
 ENV['GA_TRACKING_ID'] = 'dummy_id'
 ENV['GA_DOMAIN'] = 'dummy.domain.example.com'
 ENV['GPG_KEY'] = 'dummy-key'
-ENV['AVAILABLE_VERSIONS'] = '6.12.4,6.13.0,7.0.0-beta.1'
+ENV['AVAILABLE_VERSIONS'] = '6.12.4,6.13.0,7.0.0-beta.24'
 
 require_relative 'claw'
 require 'test/unit'
@@ -139,14 +139,14 @@ class ClawTest < Test::Unit::TestCase
     get 'stable', 'release' => 'macosx64-binary', 'version' => 'v7'
 
     assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.1/cf-cli_7.0.0-beta.1_osx.tgz', last_response.original_headers['location']
+    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf-cli_7.0.0-beta.24_osx.tgz', last_response.original_headers['location']
   end
 
   def test_stable_with_explicit_v7_version_redirects
-    get 'stable', 'release' => 'macosx64-binary', 'version' => '7.0.0-beta.1'
+    get 'stable', 'release' => 'macosx64-binary', 'version' => '7.0.0-beta.24'
 
     assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.1/cf-cli_7.0.0-beta.1_osx.tgz', last_response.original_headers['location']
+    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf-cli_7.0.0-beta.24_osx.tgz', last_response.original_headers['location']
   end
 
   def test_stable_with_http_accept_language_redirects
@@ -174,10 +174,10 @@ class ClawTest < Test::Unit::TestCase
   end
 
   def test_valid_homebrew_url_redirects_to_osx_tgz_v7
-    get '/homebrew/cf-7.0.0-beta.1.tgz'
+    get '/homebrew/cf-7.0.0-beta.24.tgz'
 
     assert_equal 302, last_response.status
-    assert_equal format(VERSIONED_V7_RELEASE_LINK, version: '7.0.0-beta.1', release: 'cf-cli_7.0.0-beta.1_osx.tgz'), last_response.original_headers['location']
+    assert_equal format(VERSIONED_V7_RELEASE_LINK, version: '7.0.0-beta.24', release: 'cf-cli_7.0.0-beta.24_osx.tgz'), last_response.original_headers['location']
   end
 
   def test_debian_dists_redirect
@@ -190,6 +190,13 @@ class ClawTest < Test::Unit::TestCase
   def test_debian_pool_redirect
     get '/debian/pool/cf_6.13.0_amd64.deb'
     expected_link = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf_6.13.0_amd64.deb'
+    assert_equal 302, last_response.status
+    assert_equal expected_link, last_response.original_headers['location']
+  end
+
+  def test_debian_pool_redirect_7
+    get '/debian/pool/cf7-cli-installer_7.0.0-beta.24_x86-64.deb'
+    expected_link = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_x86-64.deb'
     assert_equal 302, last_response.status
     assert_equal expected_link, last_response.original_headers['location']
   end
@@ -211,6 +218,13 @@ class ClawTest < Test::Unit::TestCase
   def test_fedora_releases_redirect
     get 'fedora/releases/cf_6.13.0_amd64.rpm'
     expected_link = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf_6.13.0_amd64.rpm'
+    assert_equal 302, last_response.status
+    assert_equal expected_link, last_response.original_headers['location']
+  end
+
+  def test_fedora_releases_redirect_v7
+    get 'fedora/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_x86-64.rpm'
+    expected_link = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_x86-64.rpm'
     assert_equal 302, last_response.status
     assert_equal expected_link, last_response.original_headers['location']
   end

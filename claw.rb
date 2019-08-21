@@ -54,6 +54,8 @@ VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releas
 APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
 RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
 
+FILENAME_VERSION_REGEX = /.*_(?<version>[\d.]+(-beta\.[\d]+)?)_.*/
+
 unless ENV.key?('GA_TRACKING_ID') && ENV.key?('GA_DOMAIN')
   puts 'Expected a Google Analytics env vars but they were not set'
   exit 1
@@ -143,10 +145,15 @@ class Claw < Sinatra::Base
     @google_analytics.page_view('debian', page)
 
     filename = page.split('/').last
-    has_version = /.*_(?<version>.*)_.*/.match(filename)
-    if !has_version.nil?
-      version = has_version.captures.first
-      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: filename), 302
+    version = get_version_from_filename(filename)
+    if version
+      link = if Semantic::Version.new(version).major == 7
+               VERSIONED_V7_RELEASE_LINK
+             else
+               VERSIONED_V6_RELEASE_LINK
+             end
+
+      redirect format(link, version: version, release: filename), 302
     else
       version = STABLE_VERSION
       release = filename.split('=').last
@@ -159,9 +166,13 @@ class Claw < Sinatra::Base
     @google_analytics.page_view('fedora', page)
 
     filename = page.split('/').last
-    has_version = /.*_(?<version>[\d.]+)_.*/.match(filename)
-    version = has_version.captures.first
-    redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: filename), 302
+    version = get_version_from_filename(filename)
+    link = if Semantic::Version.new(version).major == 7
+             VERSIONED_V7_RELEASE_LINK
+           else
+             VERSIONED_V6_RELEASE_LINK
+           end
+    redirect format(link, version: version, release: filename), 302
   end
 
   def validate_stable_link_parameters(release, version)
@@ -171,6 +182,15 @@ class Claw < Sinatra::Base
 
     unless AVAILABLE_VERSIONS.include?(version)
       halt 412, "Invalid 'version' value, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
+    end
+  end
+
+  def get_version_from_filename(filename)
+    has_version = FILENAME_VERSION_REGEX.match(filename)
+    if has_version
+      has_version.captures.first
+    else
+      nil
     end
   end
 

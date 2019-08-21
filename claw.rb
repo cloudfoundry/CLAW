@@ -117,9 +117,24 @@ class Claw < Sinatra::Base
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
     if Semantic::Version.new(version).major == 7
-      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename_v7('macosx64-binary', version)), 302
     else
-      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename_v6('macosx64-binary', version)), 302
+    end
+  end
+
+  get '/homebrew/cf7-*.tgz' do |version|
+    @google_analytics.set_custom_var(2, 'source', 'homebrew', 3)
+
+    unless AVAILABLE_VERSIONS.include?(version)
+      halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
+    end
+
+    @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
+    if Semantic::Version.new(version).major == 7
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename_v7('macosx64-binary', version)), 302
+    else
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename_v6('macosx64-binary', version)), 302
     end
   end
 
@@ -157,7 +172,7 @@ class Claw < Sinatra::Base
     else
       version = STABLE_VERSION
       release = filename.split('=').last
-      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename(release, version)), 302
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename_v6(release, version)), 302
     end
   end
 
@@ -194,7 +209,7 @@ class Claw < Sinatra::Base
     end
   end
 
-  def release_to_filename(release, version)
+  def release_to_filename_v6(release, version)
     {
       'debian32' => "cf-cli-installer_#{version}_i686.deb",
       'debian64' => "cf-cli-installer_#{version}_x86-64.deb",
@@ -208,6 +223,23 @@ class Claw < Sinatra::Base
       'macosx64-binary' => "cf-cli_#{version}_osx.tgz",
       'windows32-exe' => "cf-cli_#{version}_win32.zip",
       'windows64-exe' => "cf-cli_#{version}_winx64.zip"
+    }[release]
+  end
+
+  def release_to_filename_v7(release, version)
+    {
+      'debian32' => "cf7-cli-installer_#{version}_i686.deb",
+      'debian64' => "cf7-cli-installer_#{version}_x86-64.deb",
+      'redhat32' => "cf7-cli-installer_#{version}_i686.rpm",
+      'redhat64' => "cf7-cli-installer_#{version}_x86-64.rpm",
+      'macosx64' => "cf7-cli-installer_#{version}_osx.pkg",
+      'windows32' => "cf7-cli-installer_#{version}_win32.zip",
+      'windows64' => "cf7-cli-installer_#{version}_winx64.zip",
+      'linux32-binary' => "cf7-cli_#{version}_linux_i686.tgz",
+      'linux64-binary' => "cf7-cli_#{version}_linux_x86-64.tgz",
+      'macosx64-binary' => "cf7-cli_#{version}_osx.tgz",
+      'windows32-exe' => "cf7-cli_#{version}_win32.zip",
+      'windows64-exe' => "cf7-cli_#{version}_winx64.zip"
     }[release]
   end
 
@@ -230,10 +262,10 @@ class Claw < Sinatra::Base
 
     if Semantic::Version.new(version).major == 7
       url = VERSIONED_V7_RELEASE_LINK
-      filename = release_to_filename(release, version)
+      filename = release_to_filename_v7(release, version)
     else
       url = VERSIONED_V6_RELEASE_LINK
-      filename = release_to_filename(release, version)
+      filename = release_to_filename_v6(release, version)
     end
 
     format(url, version: version, release: filename)

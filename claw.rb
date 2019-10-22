@@ -258,6 +258,12 @@ class Claw < Sinatra::Base
       version = STABLE_V7_VERSION
     end
 
+    # temporary hack, we did not ship a windows binary in v6.47.1
+    # https://github.com/cloudfoundry/cli/issues/1819
+    if %w(windows64 windows64-exe).include?(release) and version == '6.47.1'
+      version = '6.46.1'
+    end
+
     validate_stable_link_parameters(release, version)
 
     if Semantic::Version.new(version).major == 7

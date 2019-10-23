@@ -4,7 +4,7 @@ ENV['RACK_ENV'] = 'test'
 ENV['GA_TRACKING_ID'] = 'dummy_id'
 ENV['GA_DOMAIN'] = 'dummy.domain.example.com'
 ENV['GPG_KEY'] = 'dummy-key'
-ENV['AVAILABLE_VERSIONS'] = '6.12.4,6.13.0,6.46.1,6.47.1,7.0.0-beta.24'
+ENV['AVAILABLE_VERSIONS'] = '6.12.4,6.13.0,7.0.0-beta.24'
 
 require_relative 'claw'
 require 'test/unit'
@@ -72,12 +72,12 @@ class ClawTest < Test::Unit::TestCase
       'redhat64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_x86-64.rpm",
       'macosx64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_osx.pkg",
       'windows32' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_win32.zip",
-      'windows64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.46.1/cf-cli-installer_6.46.1_winx64.zip",
+      'windows64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_winx64.zip",
       'linux32-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_i686.tgz",
       'linux64-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_x86-64.tgz",
       'macosx64-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_osx.tgz",
       'windows32-exe' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_win32.zip",
-      'windows64-exe' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.46.1/cf-cli_6.46.1_winx64.zip"
+      'windows64-exe' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_winx64.zip"
     }.each do |release, expected_link|
       get '/stable', 'release' => release
 
@@ -121,20 +121,6 @@ class ClawTest < Test::Unit::TestCase
     end
   end
 
-  def test_stable_windows64_installer_with_v6_47_1_temporarily_redirects_to_latest_windows_release
-    get 'stable', 'release' => 'windows64', 'version' => '6.47.1'
-
-    assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.46.1/cf-cli-installer_6.46.1_winx64.zip', last_response.original_headers['location']
-  end
-
-  def test_stable_windows64_exe_with_v6_47_1_temporarily_redirects_to_latest_windows_release
-    get 'stable', 'release' => 'windows64-exe', 'version' => '6.47.1'
-
-    assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.46.1/cf-cli_6.46.1_winx64.zip', last_response.original_headers['location']
-  end
-
   def test_stable_with_release_and_invalid_version_returns_412
     get 'stable', 'release' => 'debian32', 'version' => 'potato'
 
@@ -146,7 +132,7 @@ class ClawTest < Test::Unit::TestCase
     get 'stable', 'release' => 'macosx64-binary'
 
     assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.47.1/cf-cli_6.47.1_osx.tgz', last_response.original_headers['location']
+    assert_equal 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_osx.tgz', last_response.original_headers['location']
   end
 
   def test_stable_with_v7_redirects_to_latest_v7

@@ -7,6 +7,7 @@ applications:
   routes:
     - route: cli.run.pivotal.io
   env:
+    CURRENT_MAJOR_VERSION: ((CURRENT_MAJOR_VERSION))
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1
     GPG_KEY: |

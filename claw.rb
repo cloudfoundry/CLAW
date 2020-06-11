@@ -5,8 +5,9 @@ require 'gabba'
 require 'semantic'
 
 EDGE_LINK = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+EDGE_LINK_V6 = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
 EDGE_LINK_V7 = 'https://v7-cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
-EDGE_ARCH_TO_FILENAMES = {
+EDGE_ARCH_TO_V6_FILENAMES = {
   'linux32' => 'cf-cli_edge_linux_i686.tgz',
   'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
   'macosx64' => 'cf-cli_edge_osx.tgz',
@@ -37,10 +38,15 @@ RELEASE_NAMES = %w[
   windows64-exe
 ].freeze
 
+SUPPORTED_CLI_VERSIONS = [
+  'v6',
+  'v7'
+].freeze
+
 AVAILABLE_VERSIONS = ENV['AVAILABLE_VERSIONS'].split(',')
-STABLE_VERSION = AVAILABLE_VERSIONS
+STABLE_V6_VERSION = AVAILABLE_VERSIONS
                  .map { |version| Semantic::Version.new(version) }
-                 .reject { |version| version.major == 7 }
+                 .select { |version| version.major == 6 }
                  .last
                  .to_s
 STABLE_V7_VERSION = AVAILABLE_VERSIONS
@@ -71,6 +77,16 @@ unless ENV.key?('AVAILABLE_VERSIONS')
   exit 1
 end
 
+unless ENV.key?('CURRENT_MAJOR_VERSION')
+  puts 'CURRENT_MAJOR_VERSION not set, please set it before proceeding.'
+  exit 1
+end
+
+unless SUPPORTED_CLI_VERSIONS.include?(ENV['CURRENT_MAJOR_VERSION'])
+  puts "CURRENT_MAJOR_VERSION is set as an invalid version, only #{SUPPORTED_CLI_VERSIONS.join(', ')} are supported."
+  exit 1
+end
+
 class Claw < Sinatra::Base
   before do
     @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
@@ -87,19 +103,15 @@ class Claw < Sinatra::Base
     'pong'
   end
 
-  get '/edge' do
-    redirect_link = if params['version'] == 'v7'
-                      get_edge_redirect_link(params, EDGE_ARCH_TO_V7_FILENAMES, EDGE_LINK_V7)
-                    else
-                      get_edge_redirect_link(params, EDGE_ARCH_TO_FILENAMES, EDGE_LINK)
-                    end
-    @google_analytics.page_view('edge', "edge/#{params['arch']}")
-    redirect redirect_link, 302
-  end
-
   get /\/(debian|fedora)\/cli\.cloudfoundry\.org\.key/ do
     content_type :text
     ENV['GPG_KEY']
+  end
+
+  get '/edge' do
+    redirect_link = get_edge_redirect_link(params['version'], params['arch'])
+    @google_analytics.page_view('edge', "edge/#{params['arch']}")
+    redirect redirect_link, 302
   end
 
   get '/stable' do
@@ -117,9 +129,9 @@ class Claw < Sinatra::Base
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
     if Semantic::Version.new(version).major == 7
-      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename_v7('macosx64-binary', version)), 302
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
     else
-      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename_v6('macosx64-binary', version)), 302
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
     end
   end
 
@@ -132,9 +144,9 @@ class Claw < Sinatra::Base
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
     if Semantic::Version.new(version).major == 7
-      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename_v7('macosx64-binary', version)), 302
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
     else
-      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename_v6('macosx64-binary', version)), 302
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
     end
   end
 
@@ -170,9 +182,9 @@ class Claw < Sinatra::Base
 
       redirect format(link, version: version, release: filename), 302
     else
-      version = STABLE_VERSION
+      version = STABLE_V6_VERSION
       release = filename.split('=').last
-      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename_v6(release, version)), 302
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename(release, version)), 302
     end
   end
 
@@ -209,66 +221,66 @@ class Claw < Sinatra::Base
     end
   end
 
-  def release_to_filename_v6(release, version)
+  def release_to_filename(release, version)
+    major_version = Semantic::Version.new(version).major
+    suffix = major_version == 6 ? '' : major_version
+
     {
-      'debian32' => "cf-cli-installer_#{version}_i686.deb",
-      'debian64' => "cf-cli-installer_#{version}_x86-64.deb",
-      'redhat32' => "cf-cli-installer_#{version}_i686.rpm",
-      'redhat64' => "cf-cli-installer_#{version}_x86-64.rpm",
-      'macosx64' => "cf-cli-installer_#{version}_osx.pkg",
-      'windows32' => "cf-cli-installer_#{version}_win32.zip",
-      'windows64' => "cf-cli-installer_#{version}_winx64.zip",
-      'linux32-binary' => "cf-cli_#{version}_linux_i686.tgz",
-      'linux64-binary' => "cf-cli_#{version}_linux_x86-64.tgz",
-      'macosx64-binary' => "cf-cli_#{version}_osx.tgz",
-      'windows32-exe' => "cf-cli_#{version}_win32.zip",
-      'windows64-exe' => "cf-cli_#{version}_winx64.zip"
+      'debian32' => "cf#{suffix}-cli-installer_#{version}_i686.deb",
+      'debian64' => "cf#{suffix}-cli-installer_#{version}_x86-64.deb",
+      'redhat32' => "cf#{suffix}-cli-installer_#{version}_i686.rpm",
+      'redhat64' => "cf#{suffix}-cli-installer_#{version}_x86-64.rpm",
+      'macosx64' => "cf#{suffix}-cli-installer_#{version}_osx.pkg",
+      'windows32' => "cf#{suffix}-cli-installer_#{version}_win32.zip",
+      'windows64' => "cf#{suffix}-cli-installer_#{version}_winx64.zip",
+      'linux32-binary' => "cf#{suffix}-cli_#{version}_linux_i686.tgz",
+      'linux64-binary' => "cf#{suffix}-cli_#{version}_linux_x86-64.tgz",
+      'macosx64-binary' => "cf#{suffix}-cli_#{version}_osx.tgz",
+      'windows32-exe' => "cf#{suffix}-cli_#{version}_win32.zip",
+      'windows64-exe' => "cf#{suffix}-cli_#{version}_winx64.zip"
     }[release]
   end
 
-  def release_to_filename_v7(release, version)
-    {
-      'debian32' => "cf7-cli-installer_#{version}_i686.deb",
-      'debian64' => "cf7-cli-installer_#{version}_x86-64.deb",
-      'redhat32' => "cf7-cli-installer_#{version}_i686.rpm",
-      'redhat64' => "cf7-cli-installer_#{version}_x86-64.rpm",
-      'macosx64' => "cf7-cli-installer_#{version}_osx.pkg",
-      'windows32' => "cf7-cli-installer_#{version}_win32.zip",
-      'windows64' => "cf7-cli-installer_#{version}_winx64.zip",
-      'linux32-binary' => "cf7-cli_#{version}_linux_i686.tgz",
-      'linux64-binary' => "cf7-cli_#{version}_linux_x86-64.tgz",
-      'macosx64-binary' => "cf7-cli_#{version}_osx.tgz",
-      'windows32-exe' => "cf7-cli_#{version}_win32.zip",
-      'windows64-exe' => "cf7-cli_#{version}_winx64.zip"
-    }[release]
+  def get_edge_redirect_link(query_param_version, query_param_arch)
+    cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
+
+    if cli_version == 'v7'
+      if !query_param_arch || EDGE_ARCH_TO_V7_FILENAMES[query_param_arch].nil?
+        halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_V7_FILENAMES.keys.join(', ')}"
+      end
+
+      format(EDGE_LINK_V7, file_name: EDGE_ARCH_TO_V7_FILENAMES[query_param_arch])
+    elsif cli_version == 'v6'
+      if !query_param_arch || EDGE_ARCH_TO_V6_FILENAMES[query_param_arch].nil?
+        halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_V6_FILENAMES.keys.join(', ')}"
+      end
+
+      format(EDGE_LINK_V6, file_name: EDGE_ARCH_TO_V6_FILENAMES[query_param_arch])
+    else
+      halt 400, "Invalid 'version' query parameter, only v6, v7 or null are allowed"
+    end
   end
 
-  def get_edge_redirect_link(params, arch_to_filenames, edge_link)
-    if !params.key?('arch') || EDGE_ARCH_TO_FILENAMES[params['arch']].nil?
-      halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_FILENAMES.keys.join(', ')}"
+  def get_stable_redirect_link(query_param_version, query_param_release)
+    cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
+
+    if cli_version == 'v6'
+      cli_version = STABLE_V6_VERSION
+    elsif cli_version == 'v7'
+      cli_version = STABLE_V7_VERSION
     end
 
-    format(edge_link, file_name: arch_to_filenames[params['arch']])
-  end
+    validate_stable_link_parameters(query_param_release, cli_version)
 
-  def get_stable_redirect_link(version, release)
-    if version.nil?
-      version = STABLE_VERSION
-    elsif version == 'v7'
-      version = STABLE_V7_VERSION
-    end
-
-    validate_stable_link_parameters(release, version)
-
-    if Semantic::Version.new(version).major == 7
+    if Semantic::Version.new(cli_version).major == 7
       url = VERSIONED_V7_RELEASE_LINK
-      filename = release_to_filename_v7(release, version)
+      filename = release_to_filename(query_param_release, cli_version)
     else
       url = VERSIONED_V6_RELEASE_LINK
-      filename = release_to_filename_v6(release, version)
+      filename = release_to_filename(query_param_release, cli_version)
     end
 
-    format(url, version: version, release: filename)
+    format(url, version: cli_version, release: filename)
   end
 
   run! if app_file == $PROGRAM_NAME

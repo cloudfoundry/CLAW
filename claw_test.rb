@@ -5,6 +5,7 @@ ENV['GA_TRACKING_ID'] = 'dummy_id'
 ENV['GA_DOMAIN'] = 'dummy.domain.example.com'
 ENV['GPG_KEY'] = 'dummy-key'
 ENV['AVAILABLE_VERSIONS'] = '6.12.4,6.13.0,7.0.0-beta.24'
+ENV['CURRENT_MAJOR_VERSION'] = 'v7'
 
 require_relative 'claw'
 require 'test/unit'
@@ -22,18 +23,16 @@ class ClawTest < Test::Unit::TestCase
     assert_equal 'pong', last_response.body
   end
 
-  def test_edge_with_arch_redirects
-    EDGE_ARCH_TO_FILENAMES.each do |arch, filename|
-      get '/edge', 'arch' => arch
-
-      assert_equal 302, last_response.status, "Error requesting: #{arch}"
-      assert_equal format(EDGE_LINK, file_name: filename), last_response.original_headers['location'], "Could not find: #{arch}"
-    end
-  end
-
   def test_edge_without_arch_returns_412
     get 'edge'
+    assert_equal 412, last_response.status
+    assert_match(/invalid 'arch'/i, last_response.body)
 
+    get 'edge', 'version' => 'v7'
+    assert_equal 412, last_response.status
+    assert_match(/invalid 'arch'/i, last_response.body)
+
+    get 'edge', 'version' => 'v6'
     assert_equal 412, last_response.status
     assert_match(/invalid 'arch'/i, last_response.body)
   end
@@ -41,6 +40,39 @@ class ClawTest < Test::Unit::TestCase
   def test_edge_with_invalid_arch_returns_412
     get 'edge', 'arch' => 'awesomesause'
     assert_equal 412, last_response.status
+
+    get 'edge', 'arch' => 'awesomesause', 'version' => 'v6'
+    assert_equal 412, last_response.status
+
+    get 'edge', 'arch' => 'awesomesause', 'version' => 'v7'
+    assert_equal 412, last_response.status
+  end
+
+  def test_edge_with_arch_no_version_redirects_to_current_major_version
+    ENV['CURRENT_MAJOR_VERSION'] = 'v7'
+    EDGE_ARCH_TO_V7_FILENAMES.each do |arch, filename|
+      get '/edge', 'arch' => arch
+
+      assert_equal 302, last_response.status, "Error requesting: #{arch}"
+      assert_equal format(EDGE_LINK_V7, file_name: filename), last_response.original_headers['location'], "Could not find: #{arch}"
+    end
+
+    ENV['CURRENT_MAJOR_VERSION'] = 'v6'
+    EDGE_ARCH_TO_V6_FILENAMES.each do |arch, filename|
+      get '/edge', 'arch' => arch
+
+      assert_equal 302, last_response.status, "Error requesting: #{arch}"
+      assert_equal format(EDGE_LINK_V6, file_name: filename), last_response.original_headers['location'], "Could not find: #{arch}"
+    end
+  end
+
+  def test_edge_with_arch_redirects_v6
+    EDGE_ARCH_TO_V6_FILENAMES.each do |arch, filename|
+      get '/edge', 'arch' => arch, 'version' => 'v6'
+
+      assert_equal 302, last_response.status, "Error requesting: #{arch}"
+      assert_equal format(EDGE_LINK_V6, file_name: filename), last_response.original_headers['location'], "Could not find: #{arch}"
+    end
   end
 
   def test_edge_with_arch_redirects_v7
@@ -52,32 +84,42 @@ class ClawTest < Test::Unit::TestCase
     end
   end
 
-  def test_edge_without_arch_returns_412_v7
-    get 'edge', 'version' => 'v7'
-
-    assert_equal 412, last_response.status
-    assert_match(/invalid 'arch'/i, last_response.body)
-  end
-
-  def test_edge_with_invalid_arch_returns_412_v7
-    get 'edge', 'arch' => 'awesomesause', 'version' => 'v7'
-    assert_equal 412, last_response.status
-  end
-
-  def test_stable_with_release_and_without_version_redirects_to_latest
+  def test_stable_with_release_and_without_version_redirects_to_current_major_version
+    ENV['CURRENT_MAJOR_VERSION'] = 'v6'
     {
-      'debian32' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_i686.deb",
-      'debian64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_x86-64.deb",
-      'redhat32' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_i686.rpm",
-      'redhat64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_x86-64.rpm",
-      'macosx64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_osx.pkg",
-      'windows32' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_win32.zip",
-      'windows64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli-installer_#{STABLE_VERSION}_winx64.zip",
-      'linux32-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_i686.tgz",
-      'linux64-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_linux_x86-64.tgz",
-      'macosx64-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_osx.tgz",
-      'windows32-exe' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_win32.zip",
-      'windows64-exe' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_VERSION}/cf-cli_#{STABLE_VERSION}_winx64.zip"
+      'debian32' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli-installer_#{STABLE_V6_VERSION}_i686.deb",
+      'debian64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli-installer_#{STABLE_V6_VERSION}_x86-64.deb",
+      'redhat32' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli-installer_#{STABLE_V6_VERSION}_i686.rpm",
+      'redhat64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli-installer_#{STABLE_V6_VERSION}_x86-64.rpm",
+      'macosx64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli-installer_#{STABLE_V6_VERSION}_osx.pkg",
+      'windows32' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli-installer_#{STABLE_V6_VERSION}_win32.zip",
+      'windows64' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli-installer_#{STABLE_V6_VERSION}_winx64.zip",
+      'linux32-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli_#{STABLE_V6_VERSION}_linux_i686.tgz",
+      'linux64-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli_#{STABLE_V6_VERSION}_linux_x86-64.tgz",
+      'macosx64-binary' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli_#{STABLE_V6_VERSION}_osx.tgz",
+      'windows32-exe' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli_#{STABLE_V6_VERSION}_win32.zip",
+      'windows64-exe' => "https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v#{STABLE_V6_VERSION}/cf-cli_#{STABLE_V6_VERSION}_winx64.zip"
+    }.each do |release, expected_link|
+      get '/stable', 'release' => release
+
+      assert_equal 302, last_response.status, "Error requesting: #{release}"
+      assert_equal expected_link, last_response.original_headers['location'], "Could not find: #{release}"
+    end
+
+    ENV['CURRENT_MAJOR_VERSION'] = 'v7'
+    {
+      'debian32' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_i686.deb",
+      'debian64' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_x86-64.deb",
+      'redhat32' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_i686.rpm",
+      'redhat64' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_x86-64.rpm",
+      'macosx64' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_osx.pkg",
+      'windows32' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_win32.zip",
+      'windows64' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_winx64.zip",
+      'linux32-binary' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_linux_i686.tgz",
+      'linux64-binary' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_linux_x86-64.tgz",
+      'macosx64-binary' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_osx.tgz",
+      'windows32-exe' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_win32.zip",
+      'windows64-exe' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_winx64.zip"
     }.each do |release, expected_link|
       get '/stable', 'release' => release
 
@@ -86,20 +128,21 @@ class ClawTest < Test::Unit::TestCase
     end
   end
 
-  def test_stable_without_release_returns_412
-    get 'stable'
+  def test_stable_with_v6_redirects_to_latest_v6
+    get 'stable', 'release' => 'macosx64-binary', 'version' => 'v6'
 
-    assert_equal 412, last_response.status
-    assert_match(/invalid 'release'/i, last_response.body)
+    assert_equal 302, last_response.status
+    assert_equal 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_osx.tgz', last_response.original_headers['location']
   end
 
-  def test_stable_with_invalid_release_returns_412
-    get 'stable', 'release' => 'awesomesause'
+  def test_stable_with_v7_redirects_to_latest_v7
+    get 'stable', 'release' => 'macosx64-binary', 'version' => 'v7'
 
-    assert_equal 412, last_response.status
+    assert_equal 302, last_response.status
+    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_osx.tgz', last_response.original_headers['location']
   end
 
-  def test_stable_with_release_and_version_redirects
+  def test_stable_with_explicit_v6_version_redirects
     {
       'debian32' => 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_i686.deb',
       'debian64' => 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli-installer_6.13.0_x86-64.deb',
@@ -121,32 +164,56 @@ class ClawTest < Test::Unit::TestCase
     end
   end
 
-  def test_stable_with_release_and_invalid_version_returns_412
-    get 'stable', 'release' => 'debian32', 'version' => 'potato'
+  def test_stable_with_explicit_v7_version_redirects
+    {
+      'debian32' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_i686.deb',
+      'debian64' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_x86-64.deb',
+      'redhat32' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_i686.rpm',
+      'redhat64' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_x86-64.rpm',
+      'macosx64' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_osx.pkg',
+      'windows32' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_win32.zip',
+      'windows64' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_winx64.zip',
+      'linux32-binary' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_linux_i686.tgz',
+      'linux64-binary' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_linux_x86-64.tgz',
+      'macosx64-binary' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_osx.tgz',
+      'windows32-exe' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_win32.zip',
+      'windows64-exe' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_winx64.zip'
+    }.each do |release, expected_link|
+      get '/stable', 'release' => release, 'version' => '7.0.0-beta.24'
 
+      assert_equal 302, last_response.status, "Error requesting: #{release}"
+      assert_equal expected_link, last_response.original_headers['location'], "Could not find: #{release}"
+    end
+  end
+
+  def test_stable_without_release_returns_412
+    get 'stable'
+    assert_equal 412, last_response.status
+    assert_match(/invalid 'release'/i, last_response.body)
+
+    get 'stable', 'version' => '6.13.0'
+    assert_equal 412, last_response.status
+    assert_match(/invalid 'release'/i, last_response.body)
+
+    get 'stable', 'version' => '7.0.0'
+    assert_equal 412, last_response.status
+    assert_match(/invalid 'release'/i, last_response.body)
+  end
+
+  def test_stable_with_invalid_release_returns_412
+    get 'stable', 'release' => 'awesomesause'
+    assert_equal 412, last_response.status
+
+    get 'stable', 'release' => 'awesomesause', 'version' => '6.13.0'
+    assert_equal 412, last_response.status
+
+    get 'stable', 'release' => 'awesomesause', 'version' => '7.0.0'
     assert_equal 412, last_response.status
   end
 
-  #   test_stable_without_version_does_not_accidentally_ship_v7
-  def test_stable_without_version_redirects_to_v6
-    get 'stable', 'release' => 'macosx64-binary'
-
-    assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v6.13.0/cf-cli_6.13.0_osx.tgz', last_response.original_headers['location']
-  end
-
-  def test_stable_with_v7_redirects_to_latest_v7
-    get 'stable', 'release' => 'macosx64-binary', 'version' => 'v7'
-
-    assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_osx.tgz', last_response.original_headers['location']
-  end
-
-  def test_stable_with_explicit_v7_version_redirects
-    get 'stable', 'release' => 'macosx64-binary', 'version' => '7.0.0-beta.24'
-
-    assert_equal 302, last_response.status
-    assert_equal 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_osx.tgz', last_response.original_headers['location']
+  def test_stable_with_release_and_invalid_version_returns_412
+    get 'stable', 'release' => 'debian32', 'version' => 'potato'
+    assert_equal 412, last_response.status
   end
 
   def test_stable_with_http_accept_language_redirects
@@ -251,4 +318,5 @@ class ClawTest < Test::Unit::TestCase
     assert_equal last_response.body, 'dummy-key'
     assert_equal last_response.header['Content-Type'], 'text/plain;charset=utf-8'
   end
+
 end

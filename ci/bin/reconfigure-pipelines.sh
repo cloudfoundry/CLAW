@@ -19,7 +19,7 @@ configure_pipeline() {
   fly -t ci set-pipeline \
     -p $name \
     -c $pipeline \
-    -l <(lpass show "CLAW Credentials" --notes)
+    -l <(lpass show 'Shared-CLI/Release Process/release-pipeline-concourse-credentials.yml' --notes)
 }
 
 check_installed lpass

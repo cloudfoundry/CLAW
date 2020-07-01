@@ -11,8 +11,8 @@ resources:
     api: https://api.run.pivotal.io
     client_id: {{cli-pws-client-id}}
     client_secret: {{cli-pws-client-secret}}
-    organization: {{cli-pws-organization}}
-    space: {{cli-pws-space}}
+    organization: {{pivotal-organization}}
+    space: {{pivotal-space}}
     skip_cert_check: false
 
 - name: claw-pws-oss
@@ -21,8 +21,8 @@ resources:
     api: https://api.run.pivotal.io
     client_id: {{cli-pws-client-id}}
     client_secret: {{cli-pws-client-secret}}
-    organization: {{cli-pws-oss-organization}}
-    space: {{cli-pws-oss-space}}
+    organization: {{oss-organization}}
+    space: {{oss-space}}
     skip_cert_check: false
 
 jobs:

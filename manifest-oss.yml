@@ -7,7 +7,7 @@ applications:
   routes:
     - route: packages.cloudfoundry.org
   env:
-    CURRENT_MAJOR_VERSION: ((current_major_version))
+    CURRENT_MAJOR_VERSION: ((CURRENT_MAJOR_VERSION))
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1
     GPG_KEY: |

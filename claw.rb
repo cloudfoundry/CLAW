@@ -4,9 +4,16 @@ require 'sinatra'
 require 'gabba'
 require 'semantic'
 
-EDGE_LINK = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
-EDGE_LINK_V6 = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
-EDGE_LINK_V7 = 'https://v7-cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+if ENV['ENVIRONMENT'] == "prod"
+  EDGE_LINK = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+  EDGE_LINK_V6 = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+  EDGE_LINK_V7 = 'https://v7-cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+else
+  EDGE_LINK = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-releases/master/%{file_name}'
+  EDGE_LINK_V6 = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-releases/master/%{file_name}'
+  EDGE_LINK_V7 = 'https://cf-cli-dev.s3.amazonaws.com/v7-cf-cli-releases/master/%{file_name}'
+end
+
 EDGE_ARCH_TO_V6_FILENAMES = {
   'linux32' => 'cf-cli_edge_linux_i686.tgz',
   'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
@@ -55,10 +62,17 @@ STABLE_V7_VERSION = AVAILABLE_VERSIONS
                     .max
                     .to_s
 
-VERSIONED_V6_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
-VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v%{version}/%{release}'
-APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
-RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
+if ENV['ENVIRONMENT'] == "prod"
+  VERSIONED_V6_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
+  VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v%{version}/%{release}'
+  APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
+  RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
+else
+  VERSIONED_V6_RELEASE_LINK = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
+  VERSIONED_V7_RELEASE_LINK = 'https://cf-cli-dev.s3.amazonaws.com/v7-cf-cli-releases/releases/v%{version}/%{release}'
+  APT_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-debian-repo'
+  RPM_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-rpm-repo'
+end
 
 FILENAME_VERSION_REGEX = /.*_(?<version>[\d.]+(-beta\.[\d]+)?)_.*/
 

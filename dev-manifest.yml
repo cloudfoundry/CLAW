@@ -4,11 +4,10 @@ applications:
   buildpack: ruby_buildpack
   instances: 2
   stack: cflinuxfs3
-  routes:
-    - route: cli.run.pivotal.io
   env:
-    CURRENT_MAJOR_VERSION: ((CURRENT_MAJOR_VERSION))
-    ENVIRONMENT: prod
+    AVAILABLE_VERSIONS: 7.0.0,6.51.0
+    CURRENT_MAJOR_VERSION: v7
+    ENVIRONMENT: dev
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: UA-52116311-1
     GPG_KEY: |
@@ -64,5 +63,3 @@ applications:
       d1A4v3+JwRIb2Io=
       =OIFa
       -----END PGP PUBLIC KEY BLOCK-----
-  services:
-    - claw-logs

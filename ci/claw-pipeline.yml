@@ -60,12 +60,12 @@ jobs:
           command: push
           manifest: {{manifest-pivotal}}
           path: claw
-          vars_file:
+          vars_files:
             - claw/claw-variables.yml
       - put: claw-pws-oss
         params:
           command: push
           manifest: {{manifest-oss}}
           path: claw
-          vars_file:
+          vars_files:
             - claw/claw-variables.yml

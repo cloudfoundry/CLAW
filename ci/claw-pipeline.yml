@@ -57,14 +57,16 @@ jobs:
       - put: claw-pws-pivotal
         params:
           command: push
-          manifest: claw/manifest-pivotal.yml
+          manifest: {{manifest-pivotal}}
           path: claw
           vars:
             CURRENT_MAJOR_VERSION: v6
       - put: claw-pws-oss
         params:
           command: push
-          manifest: claw/manifest-oss.yml
+          manifest: {{manifest-oss}}
           path: claw
           vars:
             CURRENT_MAJOR_VERSION: v6
+          vars_file:
+            - {{claw-var-files}}

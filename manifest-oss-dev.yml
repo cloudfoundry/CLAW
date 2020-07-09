@@ -1,6 +1,6 @@
 ---
 applications:
-- name: claw
+- name: claw-dev
   buildpack: ruby_buildpack
   instances: 2
   stack: cflinuxfs3

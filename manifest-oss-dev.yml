@@ -5,7 +5,7 @@ applications:
   instances: 2
   stack: cflinuxfs3
   routes:
-    - route: packages.dev.cloudfoundry.org
+    - route: packages-dev.cloudfoundry.org
   env:
     CURRENT_MAJOR_VERSION: v7
     ENVIRONMENT: dev

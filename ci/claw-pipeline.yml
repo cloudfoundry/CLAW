@@ -5,6 +5,7 @@ resource_types:
     source:
       repository: nulldriver/cf-cli-resource
       tag: latest
+      cf_cli_version: 7
 
 resources:
 - name: claw
@@ -58,6 +59,7 @@ jobs:
       - put: claw-pws-pivotal
         params:
           command: push
+          strategy: rolling
           manifest: {{manifest-pivotal}}
           path: claw
           vars_files:
@@ -65,6 +67,7 @@ jobs:
       - put: claw-pws-oss
         params:
           command: push
+          strategy: rolling
           manifest: {{manifest-oss}}
           path: claw
           vars_files:

@@ -69,4 +69,4 @@ jobs:
           vars:
             CURRENT_MAJOR_VERSION: v6
           vars_file:
-            - {{claw-var-files}}
+            - claw/claw-variables.yml

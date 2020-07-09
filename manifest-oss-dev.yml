@@ -7,6 +7,7 @@ applications:
   routes:
     - route: packages-dev.cloudfoundry.org
   env:
+    AVAILABLE_VERSIONS: ((AVAILABLE_VERSIONS))
     CURRENT_MAJOR_VERSION: v7
     ENVIRONMENT: dev
     GA_DOMAIN: pivotal.io

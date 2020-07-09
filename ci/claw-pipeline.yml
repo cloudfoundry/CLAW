@@ -67,7 +67,5 @@ jobs:
           command: push
           manifest: {{manifest-oss}}
           path: claw
-          vars:
-            CURRENT_MAJOR_VERSION: v6
           vars_file:
             - claw/claw-variables.yml

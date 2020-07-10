@@ -5,7 +5,6 @@ resource_types:
     source:
       repository: nulldriver/cf-cli-resource
       tag: latest
-      cf_cli_version: 7
 
 resources:
 - name: claw
@@ -23,6 +22,7 @@ resources:
     org: {{pivotal-organization}}
     space: {{pivotal-space}}
     skip_cert_check: false
+    cf_cli_version: 7
 
 - name: claw-pws-oss
   type: cf-cli-resource
@@ -33,6 +33,7 @@ resources:
     org: {{oss-organization}}
     space: {{oss-space}}
     skip_cert_check: false
+    cf_cli_version: 7
 
 jobs:
   - name: test

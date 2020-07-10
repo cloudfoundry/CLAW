@@ -19,9 +19,8 @@ configure_pipeline() {
   fly -t ci set-pipeline \
     -p $name \
     -c $pipeline \
-    -l <(lpass show 'Shared-CLI/Release Process/release-pipeline-concourse-credentials.yml' --notes)
+    -l <(lpass show 'Shared-CLI/Release Process/release-pipeline-concourse-credentials-dev.yml' --notes)
 }
-
 check_installed lpass
 check_installed fly
 
@@ -30,4 +29,5 @@ lpass sync
 
 pipelines_path=$(cd $(dirname $0)/.. && pwd)
 
-configure_pipeline claw $pipelines_path/claw-pipeline.yml
+configure_pipeline dev-claw $pipelines_path/claw-pipeline.yml
+

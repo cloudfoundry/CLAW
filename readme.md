@@ -14,5 +14,18 @@
 * Run `ci/scripts/run-test.sh` in order to locally test CLAW
 
 ## Branching strategy
- 
 All changes should be first pushed to the develop branch, and then the master branch. There is a seperate dev pipeline that works the same but pushes to a different route (cli-dev.run.pivotal.io instead of cli.run.pivotal.io and packages-dev.cloudfoundry.org instead of packages.cloudfoundry.org) Pushing to the master branch will currently automatically trigger a push to production CLAW.
+
+## Testing Debian Dev-Claw
+```
+wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+echo "deb https://cli-dev.run.pivotal.io/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+sudo apt-get update
+sudo apt-get install cf-cli
+```
+
+## Testing RPM Dev-Claw
+```
+sudo wget -O /etc/yum.repos.d/cloudfoundry-cli.repo https://dli-dev.run.pivotal.io/fedora/cloudfoundry-cli.repo
+sudo yum install cf7-cli
+```

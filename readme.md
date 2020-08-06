@@ -26,6 +26,6 @@ sudo apt-get install cf-cli
 
 ## Testing RPM Dev-Claw
 ```
-sudo wget -O /etc/yum.repos.d/cloudfoundry-cli.repo https://dli-dev.run.pivotal.io/fedora/cloudfoundry-cli.repo
+sudo wget -O /etc/yum.repos.d/cloudfoundry-cli.repo https://cli-dev.run.pivotal.io/fedora/cloudfoundry-cli.repo
 sudo yum install cf7-cli
 ```

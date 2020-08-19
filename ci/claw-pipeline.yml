@@ -12,6 +12,8 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/CLAW
     branch: {{git-branch}}
+    ignore_paths:
+    - readme.md
 
 - name: claw-pws-pivotal
   type: cf-cli-resource

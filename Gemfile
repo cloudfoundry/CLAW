@@ -5,10 +5,10 @@ source 'http://rubygems.org'
 gem 'gabba'
 gem 'rake'
 gem 'semantic'
-gem 'sinatra'
+gem 'sinatra', '>= 2.0.5'
 gem 'unicorn'
 
 group :test, :development do
-  gem 'rack-test'
+  gem 'rack-test', '>= 1.1.0'
   gem 'test-unit'
 end

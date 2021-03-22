@@ -8,4 +8,4 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 USER codespace
 
-RUN bundle install
+RUN cd /workspaces/CLAW && bundle install

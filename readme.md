@@ -11,7 +11,7 @@
 * Provides analytics for each download link.
 
 ## Testing CLAW
-* Run `./scripts/run-test.sh` in order to locally test CLAW
+* Run `ci/scripts/run-test.sh` in order to locally test CLAW
 
 ## Branching strategy
 All changes should be first pushed to the develop branch, and then the master branch. There is a seperate dev pipeline that works the same but pushes to a different route (cli-dev.run.pivotal.io instead of cli.run.pivotal.io and packages-dev.cloudfoundry.org instead of packages.cloudfoundry.org) Pushing to the master branch will currently automatically trigger a push to production CLAW.

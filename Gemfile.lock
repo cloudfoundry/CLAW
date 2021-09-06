@@ -37,8 +37,5 @@ DEPENDENCIES
   test-unit
   unicorn
 
-RUBY VERSION
-   ruby 2.6.8p205
-
 BUNDLED WITH
    2.1.4

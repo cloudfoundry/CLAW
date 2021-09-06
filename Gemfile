@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-ruby '~>2.6.8'
 
 source 'http://rubygems.org'
 

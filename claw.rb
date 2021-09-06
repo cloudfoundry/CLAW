@@ -4,6 +4,32 @@ require 'sinatra'
 require 'gabba'
 require 'semantic'
 
+if ENV['ENVIRONMENT'] == "prod"
+  EDGE_LINK = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+  EDGE_LINK_V6 = 'https://cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+  EDGE_LINK_V7 = 'https://v7-cf-cli-releases.s3.amazonaws.com/master/%{file_name}'
+else
+  EDGE_LINK = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-releases/master/%{file_name}'
+  EDGE_LINK_V6 = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-releases/master/%{file_name}'
+  EDGE_LINK_V7 = 'https://cf-cli-dev.s3.amazonaws.com/v7-cf-cli-releases/master/%{file_name}'
+end
+
+EDGE_ARCH_TO_V6_FILENAMES = {
+  'linux32' => 'cf-cli_edge_linux_i686.tgz',
+  'linux64' => 'cf-cli_edge_linux_x86-64.tgz',
+  'macosx64' => 'cf-cli_edge_osx.tgz',
+  'windows32' => 'cf-cli_edge_win32.zip',
+  'windows64' => 'cf-cli_edge_winx64.zip'
+}.freeze
+
+EDGE_ARCH_TO_V7_FILENAMES = {
+  'linux32' => 'cf7-cli_edge_linux_i686.tgz',
+  'linux64' => 'cf7-cli_edge_linux_x86-64.tgz',
+  'macosx64' => 'cf7-cli_edge_osx.tgz',
+  'windows32' => 'cf7-cli_edge_win32.zip',
+  'windows64' => 'cf7-cli_edge_winx64.zip'
+}.freeze
+
 RELEASE_NAMES = %w[
   debian32
   debian64
@@ -19,48 +45,34 @@ RELEASE_NAMES = %w[
   windows64-exe
 ].freeze
 
-EDGE_ARCHITECTURES = %w[
-  linux32
-  linux64
-  macosx64
-  windows32
-  windows64
-].freeze
-
 SUPPORTED_CLI_VERSIONS = [
   'v6',
-  'v7',
-  'v8'
+  'v7'
 ].freeze
 
 AVAILABLE_VERSIONS = ENV['AVAILABLE_VERSIONS'].split(',')
-
 STABLE_V6_VERSION = AVAILABLE_VERSIONS
                  .map { |version| Semantic::Version.new(version) }
                  .select { |version| version.major == 6 }
                  .last
                  .to_s
-
 STABLE_V7_VERSION = AVAILABLE_VERSIONS
                     .map { |version| Semantic::Version.new(version) }
                     .select { |version| version.major == 7 }
                     .max
                     .to_s
 
-STABLE_V8_VERSION = AVAILABLE_VERSIONS
-                    .map { |version| Semantic::Version.new(version) }
-                    .select { |version| version.major == 8 }
-                    .max
-                    .to_s
-
 if ENV['ENVIRONMENT'] == "prod"
+  VERSIONED_V6_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
+  VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v%{version}/%{release}'
   APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
   RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
 else
+  VERSIONED_V6_RELEASE_LINK = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-releases/releases/v%{version}/%{release}'
+  VERSIONED_V7_RELEASE_LINK = 'https://cf-cli-dev.s3.amazonaws.com/v7-cf-cli-releases/releases/v%{version}/%{release}'
   APT_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-debian-repo'
   RPM_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-rpm-repo'
 end
-
 
 FILENAME_VERSION_REGEX = /.*_(?<version>[\d.]+(-beta\.[\d]+)?)_.*/
 
@@ -122,7 +134,7 @@ class Claw < Sinatra::Base
     redirect redirect_url, 302
   end
 
-  get '/homebrew/cf*-*.tgz' do |suffix, version|
+  get '/homebrew/cf-*.tgz' do |version|
     @google_analytics.set_custom_var(2, 'source', 'homebrew', 3)
 
     unless AVAILABLE_VERSIONS.include?(version)
@@ -130,10 +142,27 @@ class Claw < Sinatra::Base
     end
 
     @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
-
-    redirect get_versioned_release_link(version, release_to_filename('macosx64-binary', version)), 302
+    if Semantic::Version.new(version).major == 7
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+    else
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+    end
   end
 
+  get '/homebrew/cf7-*.tgz' do |version|
+    @google_analytics.set_custom_var(2, 'source', 'homebrew', 3)
+
+    unless AVAILABLE_VERSIONS.include?(version)
+      halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
+    end
+
+    @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
+    if Semantic::Version.new(version).major == 7
+      redirect format(VERSIONED_V7_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+    else
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename('macosx64-binary', version)), 302
+    end
+  end
 
   get '/debian/dists/*' do
     page = File.join('dists', params['splat'].first)
@@ -158,12 +187,19 @@ class Claw < Sinatra::Base
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)
-    unless version
+    if version
+      link = if Semantic::Version.new(version).major == 7
+               VERSIONED_V7_RELEASE_LINK
+             else
+               VERSIONED_V6_RELEASE_LINK
+             end
+
+      redirect format(link, version: version, release: filename), 302
+    else
       version = STABLE_V6_VERSION
       release = filename.split('=').last
-      filename = release_to_filename(release, version)
+      redirect format(VERSIONED_V6_RELEASE_LINK, version: version, release: release_to_filename(release, version)), 302
     end
-    redirect get_versioned_release_link(version, filename), 302
   end
 
   get '/fedora/releases/*' do
@@ -172,73 +208,12 @@ class Claw < Sinatra::Base
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)
-    link = get_versioned_release_link(version, filename)
-
+    link = if Semantic::Version.new(version).major == 7
+             VERSIONED_V7_RELEASE_LINK
+           else
+             VERSIONED_V6_RELEASE_LINK
+           end
     redirect format(link, version: version, release: filename), 302
-  end
-
-  def get_version_from_filename(filename)
-    has_version = FILENAME_VERSION_REGEX.match(filename)
-    if has_version
-      has_version.captures.first
-    else
-      nil
-    end
-  end
-
-  def get_edge_redirect_link(query_param_version, query_param_arch)
-    cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
-
-    unless SUPPORTED_CLI_VERSIONS.include?(cli_version)
-      halt 400, "Invalid 'version' query parameter, only #{SUPPORTED_CLI_VERSIONS.join(', ')} or null are allowed"
-    end
-
-    unless EDGE_ARCHITECTURES.include?(query_param_arch)
-      halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCHITECTURES.join(', ')}"
-    end
-
-    version = cli_version.delete('^0-9')
-    filename = architecture_to_filename(version, query_param_arch)
-    link = get_versioned_edge_link(version, filename)
-  end
-
-  def architecture_to_filename(version, architecture)
-    suffix = version == '6' ? '' : version
-
-    {
-      'linux32' => "cf#{suffix}-cli_edge_linux_i686.tgz",
-      'linux64' => "cf#{suffix}-cli_edge_linux_x86-64.tgz",
-      'macosx64' => "cf#{suffix}-cli_edge_osx.tgz",
-      'windows32' => "cf#{suffix}-cli_edge_win32.zip",
-      'windows64' => "cf#{suffix}-cli_edge_winx64.zip"
-    }[architecture]
-  end
-
-  def get_versioned_edge_link(version, file_name)
-    bucket_prefix = version == '6' ? '' : "v#{version}-"
-
-    if ENV['ENVIRONMENT'] == "prod"
-      "https://#{bucket_prefix}cf-cli-releases.s3.amazonaws.com/master/#{file_name}"
-    else
-      "https://cf-cli-dev.s3.amazonaws.com/#{bucket_prefix}cf-cli-releases/master/#{file_name}"
-    end
-  end
-
-  def get_stable_redirect_link(query_param_version, query_param_release)
-    cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
-
-    if cli_version == 'v6'
-      cli_version = STABLE_V6_VERSION
-    elsif cli_version == 'v7'
-      cli_version = STABLE_V7_VERSION
-    elsif cli_version == 'v8'
-      cli_version = STABLE_V8_VERSION
-    end
-
-    validate_stable_link_parameters(query_param_release, cli_version)
-
-    filename = release_to_filename(query_param_release, cli_version)
-    get_versioned_release_link(cli_version, filename)
   end
 
   def validate_stable_link_parameters(release, version)
@@ -248,6 +223,15 @@ class Claw < Sinatra::Base
 
     unless AVAILABLE_VERSIONS.include?(version)
       halt 412, "Invalid 'version' value, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
+    end
+  end
+
+  def get_version_from_filename(filename)
+    has_version = FILENAME_VERSION_REGEX.match(filename)
+    if has_version
+      has_version.captures.first
+    else
+      nil
     end
   end
 
@@ -271,15 +255,46 @@ class Claw < Sinatra::Base
     }[release]
   end
 
-  def get_versioned_release_link(version, release)
-    major_version = Semantic::Version.new(version).major
-    bucket_prefix = major_version == 6 ? '' : "v#{major_version}-"
+  def get_edge_redirect_link(query_param_version, query_param_arch)
+    cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
 
-    if ENV['ENVIRONMENT'] == "prod"
-      "https://s3-us-west-1.amazonaws.com/#{bucket_prefix}cf-cli-releases/releases/v#{version}/#{release}"
+    if cli_version == 'v7'
+      if !query_param_arch || EDGE_ARCH_TO_V7_FILENAMES[query_param_arch].nil?
+        halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_V7_FILENAMES.keys.join(', ')}"
+      end
+
+      format(EDGE_LINK_V7, file_name: EDGE_ARCH_TO_V7_FILENAMES[query_param_arch])
+    elsif cli_version == 'v6'
+      if !query_param_arch || EDGE_ARCH_TO_V6_FILENAMES[query_param_arch].nil?
+        halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCH_TO_V6_FILENAMES.keys.join(', ')}"
+      end
+
+      format(EDGE_LINK_V6, file_name: EDGE_ARCH_TO_V6_FILENAMES[query_param_arch])
     else
-      "https://cf-cli-dev.s3.amazonaws.com/#{bucket_prefix}cf-cli-releases/releases/v#{version}/#{release}"
+      halt 400, "Invalid 'version' query parameter, only v6, v7 or null are allowed"
     end
+  end
+
+  def get_stable_redirect_link(query_param_version, query_param_release)
+    cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
+
+    if cli_version == 'v6'
+      cli_version = STABLE_V6_VERSION
+    elsif cli_version == 'v7'
+      cli_version = STABLE_V7_VERSION
+    end
+
+    validate_stable_link_parameters(query_param_release, cli_version)
+
+    if Semantic::Version.new(cli_version).major == 7
+      url = VERSIONED_V7_RELEASE_LINK
+      filename = release_to_filename(query_param_release, cli_version)
+    else
+      url = VERSIONED_V6_RELEASE_LINK
+      filename = release_to_filename(query_param_release, cli_version)
+    end
+
+    format(url, version: cli_version, release: filename)
   end
 
   run! if app_file == $PROGRAM_NAME

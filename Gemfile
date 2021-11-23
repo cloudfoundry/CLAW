@@ -12,4 +12,5 @@ gem 'unicorn'
 group :test, :development do
   gem 'rack-test'
   gem 'test-unit'
+  gem "webmock"
 end

@@ -11,6 +11,7 @@ ENV['ENVIRONMENT'] = 'prod'
 require_relative 'claw'
 require 'test/unit'
 require 'rack/test'
+require 'webmock/test_unit'
 
 VERSIONED_V8_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v%{version}/%{release}'
 VERSIONED_V7_RELEASE_LINK = 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v%{version}/%{release}'
@@ -56,6 +57,15 @@ EDGE_ARCH_TO_V8_FILENAMES = {
 
 class ClawTest < Test::Unit::TestCase
   include Rack::Test::Methods
+
+  # TODO: test if timeout does not block our request
+  # TODO: that we are calling our tracking function from all expected locations
+  # TODO: 
+
+  def setup
+    stub_request(:get, /www.google-analytics.com/).
+        to_return(status: 200, body: "", headers: {})
+  end
 
   def app
     Claw

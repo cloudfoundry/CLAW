@@ -110,13 +110,13 @@ class Claw < Sinatra::Base
 
   get '/edge' do
     redirect_link = get_edge_redirect_link(params['version'], params['arch'])
-    @google_analytics.page_view('edge', "edge/#{params['arch']}")
+    page_view('edge', "edge/#{params['arch']}")
     redirect redirect_link, 302
   end
 
   get '/stable' do
     redirect_url = get_stable_redirect_link(params['version'], params['release'])
-    @google_analytics.page_view('stable', "stable/#{params['release']}/#{params['version']}")
+    page_view('stable', "stable/#{params['release']}/#{params['version']}") # > timeout; move on
     redirect redirect_url, 302
   end
 
@@ -127,7 +127,7 @@ class Claw < Sinatra::Base
       halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
 
-    @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
+    page_view('stable', "stable/macosx64-binary/#{version}")
 
     redirect get_versioned_release_link(version, release_to_filename('macosx64-binary', version)), 302
   end
@@ -135,24 +135,24 @@ class Claw < Sinatra::Base
 
   get '/debian/dists/*' do
     page = File.join('dists', params['splat'].first)
-    @google_analytics.page_view('debian', page)
+    page_view('debian', page)
     redirect File.join(APT_REPO, page), 302
   end
 
   get '/fedora/cloudfoundry-cli.repo' do
-    @google_analytics.page_view('fedora', 'cloudfoundry-cli.repo')
+    page_view('fedora', 'cloudfoundry-cli.repo')
     redirect File.join(RPM_REPO, 'cloudfoundry-cli.repo'), 302
   end
 
   get '/fedora/repodata/*' do
     page = File.join('repodata', params['splat'].first)
-    @google_analytics.page_view('fedora', page)
+    page_view('fedora', page)
     redirect File.join(RPM_REPO, page), 302
   end
 
   get '/debian/pool/*' do
     page = File.join('pool', params['splat'].first)
-    @google_analytics.page_view('debian', page)
+    page_view('debian', page)
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)
@@ -166,13 +166,18 @@ class Claw < Sinatra::Base
 
   get '/fedora/releases/*' do
     page = File.join('releases', params['splat'].first)
-    @google_analytics.page_view('fedora', page)
+    page_view('fedora', page)
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)
     link = get_versioned_release_link(version, filename)
 
     redirect format(link, version: version, release: filename), 302
+  end
+
+  def page_view(distro, page)
+    # Run this async
+    @google_analytics.page_view(distro, page)
   end
 
   def get_version_from_filename(filename)

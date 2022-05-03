@@ -11,11 +11,13 @@ RELEASE_NAMES = %w[
   redhat32
   redhat64
   macosx64
+  macosarm
   windows32
   windows64
   linux32-binary
   linux64-binary
   macosx64-binary
+  macosarm-binary
   windows32-exe
   windows64-exe
 ].freeze
@@ -24,6 +26,7 @@ EDGE_ARCHITECTURES = %w[
   linux32
   linux64
   macosx64
+  macosarm
   windows32
   windows64
 ].freeze
@@ -203,6 +206,7 @@ class Claw < Sinatra::Base
       'linux32' => "cf#{suffix}-cli_edge_linux_i686.tgz",
       'linux64' => "cf#{suffix}-cli_edge_linux_x86-64.tgz",
       'macosx64' => "cf#{suffix}-cli_edge_osx.tgz",
+      'macosarm' => "cf#{suffix}-cli_edge_macosarm.tgz",
       'windows32' => "cf#{suffix}-cli_edge_win32.zip",
       'windows64' => "cf#{suffix}-cli_edge_winx64.zip"
     }[architecture]
@@ -255,11 +259,13 @@ class Claw < Sinatra::Base
       'redhat32' => "cf#{suffix}-cli-installer_#{version}_i686.rpm",
       'redhat64' => "cf#{suffix}-cli-installer_#{version}_x86-64.rpm",
       'macosx64' => "cf#{suffix}-cli-installer_#{version}_osx.pkg",
+      'macosarm' => "cf#{suffix}-cli-installer_#{version}_macosarm.pkg",
       'windows32' => "cf#{suffix}-cli-installer_#{version}_win32.zip",
       'windows64' => "cf#{suffix}-cli-installer_#{version}_winx64.zip",
       'linux32-binary' => "cf#{suffix}-cli_#{version}_linux_i686.tgz",
       'linux64-binary' => "cf#{suffix}-cli_#{version}_linux_x86-64.tgz",
       'macosx64-binary' => "cf#{suffix}-cli_#{version}_osx.tgz",
+      'macosarm-binary' => "cf#{suffix}-cli_#{version}_macosarm.tgz",
       'windows32-exe' => "cf#{suffix}-cli_#{version}_win32.zip",
       'windows64-exe' => "cf#{suffix}-cli_#{version}_winx64.zip"
     }[release]

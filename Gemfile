@@ -6,7 +6,7 @@ source 'http://rubygems.org'
 gem 'gabba'
 gem 'rake'
 gem 'semantic'
-gem 'sinatra'
+gem 'sinatra', '>= 2.2.0'
 gem 'unicorn'
 
 group :test, :development do

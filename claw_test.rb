@@ -42,6 +42,7 @@ EDGE_ARCH_TO_V7_FILENAMES = {
   'linux32' => 'cf7-cli_edge_linux_i686.tgz',
   'linux64' => 'cf7-cli_edge_linux_x86-64.tgz',
   'macosx64' => 'cf7-cli_edge_osx.tgz',
+  'macosarm' => 'cf7-cli_edge_macosarm.tgz',
   'windows32' => 'cf7-cli_edge_win32.zip',
   'windows64' => 'cf7-cli_edge_winx64.zip'
 }.freeze
@@ -50,6 +51,7 @@ EDGE_ARCH_TO_V8_FILENAMES = {
   'linux32' => 'cf8-cli_edge_linux_i686.tgz',
   'linux64' => 'cf8-cli_edge_linux_x86-64.tgz',
   'macosx64' => 'cf8-cli_edge_osx.tgz',
+  'macosarm' => 'cf8-cli_edge_macosarm.tgz',
   'windows32' => 'cf8-cli_edge_win32.zip',
   'windows64' => 'cf8-cli_edge_winx64.zip'
 }.freeze
@@ -184,11 +186,13 @@ class ClawTest < Test::Unit::TestCase
       'redhat32' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_i686.rpm",
       'redhat64' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_x86-64.rpm",
       'macosx64' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_osx.pkg",
+      'macosarm' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_macosarm.pkg",
       'windows32' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_win32.zip",
       'windows64' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli-installer_#{STABLE_V7_VERSION}_winx64.zip",
       'linux32-binary' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_linux_i686.tgz",
       'linux64-binary' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_linux_x86-64.tgz",
       'macosx64-binary' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_osx.tgz",
+      'macosarm-binary' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_macosarm.tgz",
       'windows32-exe' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_win32.zip",
       'windows64-exe' => "https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v#{STABLE_V7_VERSION}/cf7-cli_#{STABLE_V7_VERSION}_winx64.zip"
     }.each do |release, expected_link|
@@ -205,11 +209,13 @@ class ClawTest < Test::Unit::TestCase
       'redhat32' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli-installer_#{STABLE_V8_VERSION}_i686.rpm",
       'redhat64' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli-installer_#{STABLE_V8_VERSION}_x86-64.rpm",
       'macosx64' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli-installer_#{STABLE_V8_VERSION}_osx.pkg",
+      'macosarm' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli-installer_#{STABLE_V8_VERSION}_macosarm.pkg",
       'windows32' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli-installer_#{STABLE_V8_VERSION}_win32.zip",
       'windows64' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli-installer_#{STABLE_V8_VERSION}_winx64.zip",
       'linux32-binary' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli_#{STABLE_V8_VERSION}_linux_i686.tgz",
       'linux64-binary' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli_#{STABLE_V8_VERSION}_linux_x86-64.tgz",
       'macosx64-binary' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli_#{STABLE_V8_VERSION}_osx.tgz",
+      'macosarm-binary' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli_#{STABLE_V8_VERSION}_macosarm.tgz",
       'windows32-exe' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli_#{STABLE_V8_VERSION}_win32.zip",
       'windows64-exe' => "https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v#{STABLE_V8_VERSION}/cf8-cli_#{STABLE_V8_VERSION}_winx64.zip"
     }.each do |release, expected_link|
@@ -271,11 +277,13 @@ class ClawTest < Test::Unit::TestCase
       'redhat32' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_i686.rpm',
       'redhat64' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_x86-64.rpm',
       'macosx64' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_osx.pkg',
+      'macosarm' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_macosarm.pkg',
       'windows32' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_win32.zip',
       'windows64' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli-installer_7.0.0-beta.24_winx64.zip',
       'linux32-binary' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_linux_i686.tgz',
       'linux64-binary' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_linux_x86-64.tgz',
       'macosx64-binary' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_osx.tgz',
+      'macosarm-binary' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_macosarm.tgz',
       'windows32-exe' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_win32.zip',
       'windows64-exe' => 'https://s3-us-west-1.amazonaws.com/v7-cf-cli-releases/releases/v7.0.0-beta.24/cf7-cli_7.0.0-beta.24_winx64.zip'
     }.each do |release, expected_link|
@@ -293,11 +301,13 @@ class ClawTest < Test::Unit::TestCase
       'redhat32' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli-installer_8.0.0_i686.rpm',
       'redhat64' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli-installer_8.0.0_x86-64.rpm',
       'macosx64' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli-installer_8.0.0_osx.pkg',
+      'macosarm' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli-installer_8.0.0_macosarm.pkg',
       'windows32' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli-installer_8.0.0_win32.zip',
       'windows64' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli-installer_8.0.0_winx64.zip',
       'linux32-binary' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli_8.0.0_linux_i686.tgz',
       'linux64-binary' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli_8.0.0_linux_x86-64.tgz',
       'macosx64-binary' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli_8.0.0_osx.tgz',
+      'macosarm-binary' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli_8.0.0_macosarm.tgz',
       'windows32-exe' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli_8.0.0_win32.zip',
       'windows64-exe' => 'https://s3-us-west-1.amazonaws.com/v8-cf-cli-releases/releases/v8.0.0/cf8-cli_8.0.0_winx64.zip'
     }.each do |release, expected_link|

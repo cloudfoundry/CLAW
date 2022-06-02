@@ -123,18 +123,17 @@ class Claw < Sinatra::Base
     redirect redirect_url, 302
   end
 
-  get '/homebrew/cf*-*.tgz' do |suffix, version|
+  get '/homebrew' do
     @google_analytics.set_custom_var(2, 'source', 'homebrew', 3)
 
-    unless AVAILABLE_VERSIONS.include?(version)
+    unless AVAILABLE_VERSIONS.include?(params['version'])
       halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
 
-    @google_analytics.page_view('stable', "stable/macosx64-binary/#{version}")
+    @google_analytics.page_view('stable', "stable/#{params['arch']}-binary/#{params['version']}")
 
-    redirect get_versioned_release_link(version, release_to_filename('macosx64-binary', version)), 302
+    redirect get_versioned_release_link(params['version'], release_to_filename("#{params['arch']}-binary", params['version'])), 302
   end
-
 
   get '/debian/dists/*' do
     page = File.join('dists', params['splat'].first)

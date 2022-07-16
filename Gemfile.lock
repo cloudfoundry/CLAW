@@ -2,26 +2,28 @@ GEM
   remote: http://rubygems.org/
   specs:
     gabba (1.0.1)
-    kgio (2.11.2)
-    mustermann (1.0.3)
-    power_assert (1.1.3)
-    rack (2.0.8)
-    rack-protection (2.0.5)
+    kgio (2.11.4)
+    mustermann (1.1.1)
+      ruby2_keywords (~> 0.0.1)
+    power_assert (2.0.1)
+    rack (2.2.4)
+    rack-protection (2.2.1)
       rack
-    rack-test (1.1.0)
-      rack (>= 1.0, < 3)
-    raindrops (0.19.0)
-    rake (12.3.3)
+    rack-test (2.0.2)
+      rack (>= 1.3)
+    raindrops (0.20.0)
+    rake (13.0.6)
+    ruby2_keywords (0.0.5)
     semantic (1.6.1)
-    sinatra (2.0.5)
+    sinatra (2.2.1)
       mustermann (~> 1.0)
-      rack (~> 2.0)
-      rack-protection (= 2.0.5)
+      rack (~> 2.2)
+      rack-protection (= 2.2.1)
       tilt (~> 2.0)
-    test-unit (3.2.9)
+    test-unit (3.5.3)
       power_assert
-    tilt (2.0.9)
-    unicorn (5.4.1)
+    tilt (2.0.10)
+    unicorn (6.1.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
 
@@ -33,7 +35,7 @@ DEPENDENCIES
   rack-test
   rake
   semantic
-  sinatra
+  sinatra (>= 2.2.0)
   test-unit
   unicorn
 

@@ -8,14 +8,17 @@ require 'json'
 RELEASE_NAMES = %w[
   debian32
   debian64
+  debianarm64
   redhat32
   redhat64
+  redhataarch64
   macosx64
   macosarm
   windows32
   windows64
   linux32-binary
   linux64-binary
+  linuxarm64-binary
   macosx64-binary
   macosarm-binary
   windows32-exe
@@ -25,6 +28,7 @@ RELEASE_NAMES = %w[
 EDGE_ARCHITECTURES = %w[
   linux32
   linux64
+  linuxarm64
   macosx64
   macosarm
   windows32
@@ -204,6 +208,7 @@ class Claw < Sinatra::Base
     {
       'linux32' => "cf#{suffix}-cli_edge_linux_i686.tgz",
       'linux64' => "cf#{suffix}-cli_edge_linux_x86-64.tgz",
+      'linuxarm64' => "cf#{suffix}-cli_edge_linux_arm64.tgz",
       'macosx64' => "cf#{suffix}-cli_edge_osx.tgz",
       'macosarm' => "cf#{suffix}-cli_edge_macosarm.tgz",
       'windows32' => "cf#{suffix}-cli_edge_win32.zip",
@@ -255,14 +260,17 @@ class Claw < Sinatra::Base
     {
       'debian32' => "cf#{suffix}-cli-installer_#{version}_i686.deb",
       'debian64' => "cf#{suffix}-cli-installer_#{version}_x86-64.deb",
+      'debianarm64' => "cf#{suffix}-cli-installer_#{version}_arm64.deb",
       'redhat32' => "cf#{suffix}-cli-installer_#{version}_i686.rpm",
       'redhat64' => "cf#{suffix}-cli-installer_#{version}_x86-64.rpm",
+      'redhataarch64' => "cf#{suffix}-cli-installer_#{version}_aarch64.rpm",
       'macosx64' => "cf#{suffix}-cli-installer_#{version}_osx.pkg",
       'macosarm' => "cf#{suffix}-cli-installer_#{version}_macosarm.pkg",
       'windows32' => "cf#{suffix}-cli-installer_#{version}_win32.zip",
       'windows64' => "cf#{suffix}-cli-installer_#{version}_winx64.zip",
       'linux32-binary' => "cf#{suffix}-cli_#{version}_linux_i686.tgz",
       'linux64-binary' => "cf#{suffix}-cli_#{version}_linux_x86-64.tgz",
+      'linuxarm64-binary' => "cf#{suffix}-cli_#{version}_linux_arm64.tgz",
       'macosx64-binary' => "cf#{suffix}-cli_#{version}_osx.tgz",
       'macosarm-binary' => "cf#{suffix}-cli_#{version}_macosarm.tgz",
       'windows32-exe' => "cf#{suffix}-cli_#{version}_win32.zip",

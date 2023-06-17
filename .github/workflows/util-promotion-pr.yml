@@ -18,3 +18,5 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: develop
+          title: "Promote changes from develop to the master branch"
+          body: ""

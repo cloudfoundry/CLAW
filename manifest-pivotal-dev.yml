@@ -7,7 +7,7 @@ applications:
   env:
     AVAILABLE_VERSIONS: ((AVAILABLE_VERSIONS))
     CURRENT_MAJOR_VERSION: v7
-    ENVIRONMENT: dev
+    ENVIRONMENT: prod
     GA_DOMAIN: pivotal.io
     GA_TRACKING_ID: G-870SLF786W
 

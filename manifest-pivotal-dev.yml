@@ -9,7 +9,7 @@ applications:
     CURRENT_MAJOR_VERSION: v7
     ENVIRONMENT: dev
     GA_DOMAIN: pivotal.io
-    GA_TRACKING_ID: UA-52116311-1
+    GA_TRACKING_ID: 387814605
 
     GPG_KEY: |
       -----BEGIN PGP PUBLIC KEY BLOCK-----

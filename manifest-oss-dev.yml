@@ -3,7 +3,6 @@ applications:
 - name: claw-dev
   buildpack: ruby_buildpack
   instances: 2
-  stack: cflinuxfs3
   env:
     AVAILABLE_VERSIONS: ((AVAILABLE_VERSIONS))
     CURRENT_MAJOR_VERSION: v7

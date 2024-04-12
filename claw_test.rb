@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 ENV['RACK_ENV'] = 'test'
-ENV['GA_TRACKING_ID'] = 'dummy_id'
-ENV['GA_DOMAIN'] = 'dummy.domain.example.com'
 ENV['GPG_KEY'] = 'dummy-key'
 ENV['AVAILABLE_VERSIONS'] = '["6.12.4", "6.13.0", "7.0.0-beta.24", "8.0.0", "8.0.1"]'
 ENV['CURRENT_MAJOR_VERSION'] = 'v7'

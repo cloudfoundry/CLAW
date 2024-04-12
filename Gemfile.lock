@@ -1,7 +1,6 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    gabba (1.0.1)
     kgio (2.11.4)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
@@ -31,7 +30,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  gabba
   rack-test
   rake
   semantic
@@ -40,7 +38,7 @@ DEPENDENCIES
   unicorn
 
 RUBY VERSION
-   ruby 2.6.8p205
+   ruby 3.3.0p0
 
 BUNDLED WITH
    2.1.4

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
-ruby '~>2.6'
+ruby '~>3.2'
 
 source 'http://rubygems.org'
 
-gem 'gabba'
 gem 'rake'
 gem 'semantic'
 gem 'sinatra'

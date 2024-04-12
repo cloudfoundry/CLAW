@@ -3,7 +3,6 @@ ruby '~>2.6'
 
 source 'http://rubygems.org'
 
-gem 'gabba'
 gem 'rake'
 gem 'semantic'
 gem 'sinatra'

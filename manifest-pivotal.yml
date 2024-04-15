@@ -3,10 +3,13 @@ applications:
 - name: claw
   buildpack: ruby_buildpack
   instances: 2
+  stack: cflinuxfs3
   env:
     AVAILABLE_VERSIONS: ((AVAILABLE_VERSIONS))
     CURRENT_MAJOR_VERSION: v6
     ENVIRONMENT: prod
+    GA_DOMAIN: pivotal.io
+    GA_TRACKING_ID: UA-52116311-1
     GPG_KEY: |
       -----BEGIN PGP PUBLIC KEY BLOCK-----
 

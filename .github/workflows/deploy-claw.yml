@@ -2,7 +2,9 @@ name: "Deploy: CLAW"
 
 on:
   workflow_dispatch:
-
+  push:
+    branches:
+      - 'oss-migration'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -45,7 +47,7 @@ jobs:
           cf push --manifest manifest-oss-dev.yml --vars-file claw-variables.yml --strategy rolling
           cf map-route claw-dev packages-dev.cloudfoundry.org
           cf map-route claw-dev packages-dev.sc2-04-pcf1-apps.oc.vmware.com
-          
+
           # routes:
           #   - route: packages-dev.cloudfoundry.org
           #   - route: packages-dev.sc2-04-pcf1-apps.oc.vmware.com          

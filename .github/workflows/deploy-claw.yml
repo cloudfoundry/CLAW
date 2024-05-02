@@ -1,0 +1,51 @@
+name: "Deploy: CLAW"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout CLAW
+      uses: actions/checkout@v4
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '2.6' # Not needed with a .ruby-version file
+        bundler-cache: true 
+    - name: Run Tests
+      run: bundle exec rake test
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CLAW
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # Install CLI
+          # ...first add the Cloud Foundry Foundation public key and package repository to your system
+          wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+          echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+            
+          # ...then, update your local package index, then finally install the cf CLI
+          sudo apt-get update
+          sudo apt-get install cf8-cli       
+
+      - name: Push CLAW
+        run: |
+          cf api ${{ secrets.CFF_FOUNDATION_URL }}
+          export CF_USERNAME=${{ secrets.CFF_FOUNDATION_USERNAME }}
+          export CF_PASSWORD=${{ secrets.CFF_FOUNDATION_PASSWORD }}
+
+          cf auth
+          cf target -o ${{ secrets.CLAW_APP_ORG }} -s ${{ secrets.CLAW_APP_SPACE }}
+          cf push --manifest manifest-oss-dev.yml --vars-file claw-variables.yml --strategy rolling
+          cf map-route claw-dev packages-dev.cloudfoundry.org
+          cf map-route claw-dev packages-dev.sc2-04-pcf1-apps.oc.vmware.com
+          
+          # routes:
+          #   - route: packages-dev.cloudfoundry.org
+          #   - route: packages-dev.sc2-04-pcf1-apps.oc.vmware.com          

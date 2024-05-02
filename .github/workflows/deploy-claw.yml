@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'oss-migration-*'
+      - 'oss-migration*'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -45,6 +45,4 @@ jobs:
 
           cf auth
           cf target -o ${{ secrets.APP_ORG }} -s ${{ secrets.APP_SPACE }}
-          cf push --manifest manifest-oss-dev.yml --vars-file claw-variables.yml --strategy rolling
-          cf push --manifest manifest-oss.yml --vars-file claw-variables.yml --strategy rolling
-         
+          cf push --manifest manifest-oss-dev.yml --vars-file claw-variables.yml --strategy rolling         

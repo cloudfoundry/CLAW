@@ -21,6 +21,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
       - name: Checkout CLAW
         uses: actions/checkout@v4
@@ -45,8 +46,8 @@ jobs:
           cf auth
           cf target -o ${{ secrets.CLAW_APP_ORG }} -s ${{ secrets.CLAW_APP_SPACE }}
           cf push --manifest manifest-oss-dev.yml --vars-file claw-variables.yml --strategy rolling
-          cf map-route claw-dev packages-dev.cloudfoundry.org
-          cf map-route claw-dev packages-dev.sc2-04-pcf1-apps.oc.vmware.com
+          # cf map-route claw-dev packages-dev.cloudfoundry.org
+          # cf map-route claw-dev packages-dev.sc2-04-pcf1-apps.oc.vmware.com
 
           # routes:
           #   - route: packages-dev.cloudfoundry.org

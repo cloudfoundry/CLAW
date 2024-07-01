@@ -69,11 +69,6 @@ else
   RPM_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-rpm-repo'
 end
 
-unless ENV.key?('GA_TRACKING_ID') && ENV.key?('GA_DOMAIN')
-  puts 'Expected a Google Analytics env vars but they were not set'
-  exit 1
-end
-
 unless ENV.key?('GPG_KEY')
   puts 'Expected a GPG_KEY env var but it was not set'
   exit 1
@@ -95,17 +90,6 @@ unless SUPPORTED_CLI_VERSIONS.include?(ENV['CURRENT_MAJOR_VERSION'])
 end
 
 class Claw < Sinatra::Base
-  before do
-    @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
-    accept_language = request.env['HTTP_ACCEPT_LANGUAGE']
-    @google_analytics.utmul = accept_language if accept_language
-
-    @google_analytics.set_custom_var(1, 'ip', request.ip, 3)
-    @google_analytics.set_custom_var(2, 'source', params['source'], 3)
-    @google_analytics.set_custom_var(3, 'referer', request.referer, 3)
-    @google_analytics.set_custom_var(4, 'host', request.host, 3)
-  end
-
   get '/ping' do
     'pong'
   end
@@ -117,48 +101,38 @@ class Claw < Sinatra::Base
 
   get '/edge' do
     redirect_link = get_edge_redirect_link(params['version'], params['arch'])
-    @google_analytics.page_view('edge', "edge/#{params['arch']}")
     redirect redirect_link, 302
   end
 
   get '/stable' do
     redirect_url = get_stable_redirect_link(params['version'], params['release'])
-    @google_analytics.page_view('stable', "stable/#{params['release']}/#{params['version']}")
     redirect redirect_url, 302
   end
 
   get '/homebrew' do
-    @google_analytics.set_custom_var(2, 'source', 'homebrew', 3)
-
     unless AVAILABLE_VERSIONS.include?(params['version'])
       halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
-
-    @google_analytics.page_view('stable', "stable/#{params['arch']}-binary/#{params['version']}")
 
     redirect get_versioned_release_link(params['version'], release_to_filename("#{params['arch']}-binary", params['version'])), 302
   end
 
   get '/debian/dists/*' do
     page = File.join('dists', params['splat'].first)
-    @google_analytics.page_view('debian', page)
     redirect File.join(APT_REPO, page), 302
   end
 
   get '/fedora/cloudfoundry-cli.repo' do
-    @google_analytics.page_view('fedora', 'cloudfoundry-cli.repo')
     redirect File.join(RPM_REPO, 'cloudfoundry-cli.repo'), 302
   end
 
   get '/fedora/repodata/*' do
     page = File.join('repodata', params['splat'].first)
-    @google_analytics.page_view('fedora', page)
     redirect File.join(RPM_REPO, page), 302
   end
 
   get '/debian/pool/*' do
     page = File.join('pool', params['splat'].first)
-    @google_analytics.page_view('debian', page)
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)
@@ -172,7 +146,6 @@ class Claw < Sinatra::Base
 
   get '/fedora/releases/*' do
     page = File.join('releases', params['splat'].first)
-    @google_analytics.page_view('fedora', page)
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)

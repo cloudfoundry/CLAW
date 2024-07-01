@@ -10,7 +10,7 @@ name: "Test: Ruby"
 on:
   workflow_dispatch:
   push:
-    branches: [ "*" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -21,9 +21,6 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     ruby-version: ['3.2']
 
     steps:
     - uses: actions/checkout@v3

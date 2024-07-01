@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'oss-migration*'
+      - 'develop'
 jobs:
   test:
     runs-on: ubuntu-latest

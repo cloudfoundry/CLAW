@@ -1,6 +1,6 @@
 ---
 applications:
-- name: claw-test
+- name: claw-dev
   buildpack: ruby_buildpack
   instances: 2
   env:

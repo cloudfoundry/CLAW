@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'oss-migration*'
+      - 'master'
   workflow_dispatch:
 jobs:
   test:

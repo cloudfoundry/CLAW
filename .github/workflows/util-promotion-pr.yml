@@ -1,0 +1,22 @@
+name: "UTIL: Create promotion pull request for default branch"
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  masterPromotion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: Reset master branch
+        run: |
+          git fetch origin develop:develop
+          git reset --hard develop
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: develop
+          title: "Promote changes from develop to the master branch"
+          body: ""

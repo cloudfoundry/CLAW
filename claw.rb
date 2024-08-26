@@ -8,14 +8,19 @@ require 'json'
 RELEASE_NAMES = %w[
   debian32
   debian64
+  debianarm64
   redhat32
   redhat64
+  redhataarch64
   macosx64
+  macosarm
   windows32
   windows64
   linux32-binary
   linux64-binary
+  linuxarm64-binary
   macosx64-binary
+  macosarm-binary
   windows32-exe
   windows64-exe
 ].freeze
@@ -23,7 +28,9 @@ RELEASE_NAMES = %w[
 EDGE_ARCHITECTURES = %w[
   linux32
   linux64
+  linuxarm64
   macosx64
+  macosarm
   windows32
   windows64
 ].freeze
@@ -62,11 +69,6 @@ else
   RPM_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-rpm-repo'
 end
 
-unless ENV.key?('GA_TRACKING_ID') && ENV.key?('GA_DOMAIN')
-  puts 'Expected a Google Analytics env vars but they were not set'
-  exit 1
-end
-
 unless ENV.key?('GPG_KEY')
   puts 'Expected a GPG_KEY env var but it was not set'
   exit 1
@@ -88,17 +90,6 @@ unless SUPPORTED_CLI_VERSIONS.include?(ENV['CURRENT_MAJOR_VERSION'])
 end
 
 class Claw < Sinatra::Base
-  before do
-    @google_analytics = Gabba::Gabba.new(ENV['GA_TRACKING_ID'], ENV['GA_DOMAIN'], request.user_agent)
-    accept_language = request.env['HTTP_ACCEPT_LANGUAGE']
-    @google_analytics.utmul = accept_language if accept_language
-
-    @google_analytics.set_custom_var(1, 'ip', request.ip, 3)
-    @google_analytics.set_custom_var(2, 'source', params['source'], 3)
-    @google_analytics.set_custom_var(3, 'referer', request.referer, 3)
-    @google_analytics.set_custom_var(4, 'host', request.host, 3)
-  end
-
   get '/ping' do
     'pong'
   end
@@ -110,49 +101,38 @@ class Claw < Sinatra::Base
 
   get '/edge' do
     redirect_link = get_edge_redirect_link(params['version'], params['arch'])
-    page_view('edge', "edge/#{params['arch']}")
     redirect redirect_link, 302
   end
 
   get '/stable' do
     redirect_url = get_stable_redirect_link(params['version'], params['release'])
-    page_view('stable', "stable/#{params['release']}/#{params['version']}") # > timeout; move on
     redirect redirect_url, 302
   end
 
-  get '/homebrew/cf*-*.tgz' do |suffix, version|
-    @google_analytics.set_custom_var(2, 'source', 'homebrew', 3)
-
-    unless AVAILABLE_VERSIONS.include?(version)
+  get '/homebrew' do
+    unless AVAILABLE_VERSIONS.include?(params['version'])
       halt 412, "Invalid version, please select one of the following versions: #{AVAILABLE_VERSIONS.join(', ')}"
     end
 
-    page_view('stable', "stable/macosx64-binary/#{version}")
-
-    redirect get_versioned_release_link(version, release_to_filename('macosx64-binary', version)), 302
+    redirect get_versioned_release_link(params['version'], release_to_filename("#{params['arch']}-binary", params['version'])), 302
   end
-
 
   get '/debian/dists/*' do
     page = File.join('dists', params['splat'].first)
-    page_view('debian', page)
     redirect File.join(APT_REPO, page), 302
   end
 
   get '/fedora/cloudfoundry-cli.repo' do
-    page_view('fedora', 'cloudfoundry-cli.repo')
     redirect File.join(RPM_REPO, 'cloudfoundry-cli.repo'), 302
   end
 
   get '/fedora/repodata/*' do
     page = File.join('repodata', params['splat'].first)
-    page_view('fedora', page)
     redirect File.join(RPM_REPO, page), 302
   end
 
   get '/debian/pool/*' do
     page = File.join('pool', params['splat'].first)
-    page_view('debian', page)
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)
@@ -166,7 +146,6 @@ class Claw < Sinatra::Base
 
   get '/fedora/releases/*' do
     page = File.join('releases', params['splat'].first)
-    page_view('fedora', page)
 
     filename = page.split('/').last
     version = get_version_from_filename(filename)
@@ -207,7 +186,9 @@ class Claw < Sinatra::Base
     {
       'linux32' => "cf#{suffix}-cli_edge_linux_i686.tgz",
       'linux64' => "cf#{suffix}-cli_edge_linux_x86-64.tgz",
+      'linuxarm64' => "cf#{suffix}-cli_edge_linux_arm64.tgz",
       'macosx64' => "cf#{suffix}-cli_edge_osx.tgz",
+      'macosarm' => "cf#{suffix}-cli_edge_macosarm.tgz",
       'windows32' => "cf#{suffix}-cli_edge_win32.zip",
       'windows64' => "cf#{suffix}-cli_edge_winx64.zip"
     }[architecture]
@@ -257,14 +238,19 @@ class Claw < Sinatra::Base
     {
       'debian32' => "cf#{suffix}-cli-installer_#{version}_i686.deb",
       'debian64' => "cf#{suffix}-cli-installer_#{version}_x86-64.deb",
+      'debianarm64' => "cf#{suffix}-cli-installer_#{version}_arm64.deb",
       'redhat32' => "cf#{suffix}-cli-installer_#{version}_i686.rpm",
       'redhat64' => "cf#{suffix}-cli-installer_#{version}_x86-64.rpm",
+      'redhataarch64' => "cf#{suffix}-cli-installer_#{version}_aarch64.rpm",
       'macosx64' => "cf#{suffix}-cli-installer_#{version}_osx.pkg",
+      'macosarm' => "cf#{suffix}-cli-installer_#{version}_macosarm.pkg",
       'windows32' => "cf#{suffix}-cli-installer_#{version}_win32.zip",
       'windows64' => "cf#{suffix}-cli-installer_#{version}_winx64.zip",
       'linux32-binary' => "cf#{suffix}-cli_#{version}_linux_i686.tgz",
       'linux64-binary' => "cf#{suffix}-cli_#{version}_linux_x86-64.tgz",
+      'linuxarm64-binary' => "cf#{suffix}-cli_#{version}_linux_arm64.tgz",
       'macosx64-binary' => "cf#{suffix}-cli_#{version}_osx.tgz",
+      'macosarm-binary' => "cf#{suffix}-cli_#{version}_macosarm.tgz",
       'windows32-exe' => "cf#{suffix}-cli_#{version}_win32.zip",
       'windows64-exe' => "cf#{suffix}-cli_#{version}_winx64.zip"
     }[release]

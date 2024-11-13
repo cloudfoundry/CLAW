@@ -25,16 +25,6 @@ RELEASE_NAMES = %w[
   windows64-exe
 ].freeze
 
-EDGE_ARCHITECTURES = %w[
-  linux32
-  linux64
-  linuxarm64
-  macosx64
-  macosarm
-  windows32
-  windows64
-].freeze
-
 SUPPORTED_CLI_VERSIONS = [
   'v6',
   'v7',
@@ -61,13 +51,8 @@ STABLE_V8_VERSION = AVAILABLE_VERSIONS
                     .max
                     .to_s
 
-if ENV['ENVIRONMENT'] == "prod"
-  APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
-  RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
-else
-  APT_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-debian-repo'
-  RPM_REPO = 'https://cf-cli-dev.s3.amazonaws.com/cf-cli-rpm-repo'
-end
+APT_REPO = 'https://cf-cli-debian-repo.s3.amazonaws.com/'
+RPM_REPO = 'https://cf-cli-rpm-repo.s3.amazonaws.com/'
 
 unless ENV.key?('GPG_KEY')
   puts 'Expected a GPG_KEY env var but it was not set'
@@ -97,11 +82,6 @@ class Claw < Sinatra::Base
   get /\/(debian|fedora)\/cli\.cloudfoundry\.org\.key/ do
     content_type :text
     ENV['GPG_KEY']
-  end
-
-  get '/edge' do
-    redirect_link = get_edge_redirect_link(params['version'], params['arch'])
-    redirect redirect_link, 302
   end
 
   get '/stable' do
@@ -159,46 +139,6 @@ class Claw < Sinatra::Base
     match[:version]
   end
 
-  def get_edge_redirect_link(query_param_version, query_param_arch)
-    cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
-
-    unless SUPPORTED_CLI_VERSIONS.include?(cli_version)
-      halt 400, "Invalid 'version' query parameter, only #{SUPPORTED_CLI_VERSIONS.join(', ')} or null are allowed"
-    end
-
-    unless EDGE_ARCHITECTURES.include?(query_param_arch)
-      halt 412, "Invalid 'arch' value, please select one of the following edge: #{EDGE_ARCHITECTURES.join(', ')}"
-    end
-
-    version = cli_version.delete('^0-9')
-    filename = architecture_to_filename(version, query_param_arch)
-    link = get_versioned_edge_link(version, filename)
-  end
-
-  def architecture_to_filename(version, architecture)
-    suffix = version == '6' ? '' : version
-
-    {
-      'linux32' => "cf#{suffix}-cli_edge_linux_i686.tgz",
-      'linux64' => "cf#{suffix}-cli_edge_linux_x86-64.tgz",
-      'linuxarm64' => "cf#{suffix}-cli_edge_linux_arm64.tgz",
-      'macosx64' => "cf#{suffix}-cli_edge_osx.tgz",
-      'macosarm' => "cf#{suffix}-cli_edge_macosarm.tgz",
-      'windows32' => "cf#{suffix}-cli_edge_win32.zip",
-      'windows64' => "cf#{suffix}-cli_edge_winx64.zip"
-    }[architecture]
-  end
-
-  def get_versioned_edge_link(version, file_name)
-    bucket_prefix = version == '6' ? '' : "v#{version}-"
-
-    if ENV['ENVIRONMENT'] == "prod"
-      "https://#{bucket_prefix}cf-cli-releases.s3.amazonaws.com/master/#{file_name}"
-    else
-      "https://cf-cli-dev.s3.amazonaws.com/#{bucket_prefix}cf-cli-releases/master/#{file_name}"
-    end
-  end
-
   def get_stable_redirect_link(query_param_version, query_param_release)
     cli_version = query_param_version || ENV['CURRENT_MAJOR_VERSION']
 
@@ -252,14 +192,7 @@ class Claw < Sinatra::Base
   end
 
   def get_versioned_release_link(version, release)
-    major_version = Semantic::Version.new(version).major
-    bucket_prefix = major_version == 6 ? '' : "v#{major_version}-"
-
-    if ENV['ENVIRONMENT'] == "prod"
-      "https://s3-us-west-1.amazonaws.com/#{bucket_prefix}cf-cli-releases/releases/v#{version}/#{release}"
-    else
-      "https://cf-cli-dev.s3.amazonaws.com/#{bucket_prefix}cf-cli-releases/releases/v#{version}/#{release}"
-    end
+    "https://github.com/cloudfoundry/cli/releases/download/v#{version}/#{release}"
   end
 
   run! if app_file == $PROGRAM_NAME

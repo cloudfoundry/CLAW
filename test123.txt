@@ -1,1 +1,2 @@
 /home/runner/work/cli/cli/CLAW
+/home/runner/work/cli/cli/CLAW
